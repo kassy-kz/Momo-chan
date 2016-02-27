@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         // 一番最初にパーミッションたずねてしまおう
         // まだパーミッションを得ていない
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !checkPermission()) {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(getApplicationContext())) {
             Log.i(TAG, "not granted yet");
 //            // ダイアログを出してパーミッション許可を取りに行く
             checkDrawOverlayPermission();
@@ -77,19 +77,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * パーミッションを尋ねた結果
+     * パーミッション尋ねた結果
      * @param requestCode
-     * @param permissions
-     * @param grantResults
+     * @param resultCode
+     * @param data
      */
+    @TargetApi(Build.VERSION_CODES.M)
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        Log.i(TAG, "onRequestPermissionsResult");
-        Log.d(TAG, "起動");
-        startService(new Intent(MainActivity.this, ConciergeService.class));
+    protected void onActivityResult(int requestCode, int resultCode,  Intent data) {
+        if (requestCode == REQUEST_CODE) {
+            if (Settings.canDrawOverlays(this)) {
+                Log.d(TAG,"起動");
+                startService(new Intent(MainActivity.this, ConciergeService.class));
+            }
+        }
     }
-
     /**
      * アプリに必要なパーミッションを尋ねる
      * @return true if yet granted, false if not granted
