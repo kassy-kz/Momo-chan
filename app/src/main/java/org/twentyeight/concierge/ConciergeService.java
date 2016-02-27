@@ -1,17 +1,21 @@
 package org.twentyeight.concierge;
 
+import android.annotation.TargetApi;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
+import java.util.Locale;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -19,7 +23,7 @@ import java.util.TimerTask;
 /**
  * Created by YKEI on 2016/02/27.
  */
-public class ConciergeService extends Service {
+public class ConciergeService extends Service implements TextToSpeech.OnInitListener {
     WindowManager.LayoutParams prms;
 
     private static final String TAG = "ConciergeService";
@@ -30,6 +34,10 @@ public class ConciergeService extends Service {
     private int mWalkCounter;
     private static final int WALK_COUNT_MAX = 120;
     private Timer mWalkTimer;
+    private Timer mAppUsageTimer;
+    private TextToSpeech mTts;
+    private String mBeforeApp = "";
+
 
     @Override
     public void onStart(Intent intent, int startId) {
@@ -64,11 +72,29 @@ public class ConciergeService extends Service {
 
         Log.d(TAG, "onStart end");
         startWalkCharacter();
+
+        mAppUsageTimer = new Timer();
+        mAppUsageTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                String app = Utils.getTopApplicationPackage(ConciergeService.this);
+                if (!mBeforeApp.equals(app)) {
+                    Log.i(TAG, "app : " +  app);
+                    mBeforeApp = app;
+                    if ("com.google.android.dialer".equals(app)) {
+                        speechText("電話かけるの");
+                    }
+                }
+            }
+        }, 100, 100);
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
+        // TextToSpeechオブジェクトの生成
+        mTts = new TextToSpeech(this, this);
+
     }
 
     @Override
@@ -83,6 +109,20 @@ public class ConciergeService extends Service {
     public IBinder onBind(Intent intent) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public void onInit(int status) {
+        if (TextToSpeech.SUCCESS == status) {
+            Locale locale = Locale.JAPANESE;
+            if (mTts.isLanguageAvailable(locale) >= TextToSpeech.LANG_AVAILABLE) {
+                mTts.setLanguage(locale);
+            } else {
+                Log.d("", "Error SetLocale");
+            }
+        } else {
+            Log.d("", "Error Init");
+        }
     }
 
 
@@ -172,5 +212,21 @@ public class ConciergeService extends Service {
                 wm.updateViewLayout(view, params);
             }
         });
+    }
+
+    /**
+     * TextToSpeechで喋らせる
+     */
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void speechText(String str) {
+        if (0 < str.length()) {
+            if (mTts.isSpeaking()) {
+                // 読み上げ中なら止める
+                mTts.stop();
+            }
+
+            // 読み上げ開始
+            mTts.speak(str, TextToSpeech.QUEUE_FLUSH, null, null);
+        }
     }
 }
