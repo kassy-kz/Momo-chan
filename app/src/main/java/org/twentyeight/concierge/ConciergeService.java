@@ -113,36 +113,6 @@ public class ConciergeService extends Service {
 
     }
 
-    /**
-     * 遅延処理を追加する.
-     * 遅延時間と遅延後表示するIDを渡すこと
-     *
-     * @param ms 遅延時間
-     * @param current 表示対象ID(R.id.hoge)
-     */
-    private void addHandler(int ms, final int current){
-        this.oldId = this.currentId;
-        this.currentId = current;
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Log.d("あああ"," ああああ, old:" + oldId + ", new:" + currentId);
-
-                // 非表示にすべき項目の非表示
-                ImageView oldImage = (ImageView) view.findViewById(oldId);
-                oldImage.setVisibility(View.INVISIBLE);
-
-                // 表示すべき項目の表示
-                ImageView currentImage = (ImageView) view.findViewById(currentId);
-                currentImage.setVisibility(View.VISIBLE);
-                currentImage.setImageResource(R.drawable.idle_r1);
-
-            }
-        }, ms);
-    }
-
-
     public class AnimationDetail{
         private int ms = 0;
         private int id = 0;
