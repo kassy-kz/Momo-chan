@@ -27,12 +27,8 @@ public class ConciergeService extends Service {
     public void onStart(Intent intent, int startId) {
         super.onStart(intent, startId);
 
-        Log.d(TAG, "onStart start");
-
         // Viewからインフレータを作成する
         LayoutInflater layoutInflater = LayoutInflater.from(this);
-
-        Log.d(TAG, "onStart start 001");
 
         // 重ね合わせするViewの設定を行う
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
@@ -42,12 +38,8 @@ public class ConciergeService extends Service {
                 WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
                 PixelFormat.TRANSLUCENT);
 
-        Log.d(TAG, "onStart start 020");
-
         // WindowManagerを取得する
         wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-
-        Log.d(TAG, "onStart start 030");
 
         // レイアウトファイルから重ね合わせするViewを作成する
         view = layoutInflater.inflate(R.layout.overlay, null);
