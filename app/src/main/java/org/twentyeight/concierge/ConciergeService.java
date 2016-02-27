@@ -7,6 +7,7 @@ import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -34,7 +35,8 @@ public class ConciergeService extends Service {
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
+                WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL|
                 WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
                 PixelFormat.TRANSLUCENT);
 
@@ -48,6 +50,13 @@ public class ConciergeService extends Service {
         // レイアウトファイルから重ね合わせするViewを作成する
         view = layoutInflater.inflate(R.layout.overlay, null);
 
+        view.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                Log.i(TAG, "on touch ===============================");
+                return true;
+            }
+        });
         Log.d(TAG, "onStart start 040");
 
         // Viewを画面上に重ね合わせする
