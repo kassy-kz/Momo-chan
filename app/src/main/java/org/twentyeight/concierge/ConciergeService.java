@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Random;
+import java.util.HashMap;
 
 /**
  * Created by YKEI on 2016/02/27.
@@ -32,24 +33,166 @@ public class ConciergeService extends Service {
     private static final int WALK_COUNT_MAX = 120;
     private Timer mWalkTimer;
 
-
     // 現在表示したいID(R.id.hoge)
-    private int currentId = 0;
+    private int currentImageViewId = 0;
 
     // アニメーションの実行回数
     private int count = 0;
 
+    // ↓ これを変えるとキャラがかわります！！
     // 現在実行すべきアニメーションの種類番号
-    private int currentType = 0;
+    private String currentType = "1"; // 1〜17にすると変わります！
 
     // タイマー（定期実行関係）
     Timer   mTimer   = null;
     Handler mHandler = new Handler();
 
+    // アニメデータのサイクル
+    private final int MS = 500;
+
+    // アニメデータ
+    AnimationData anime = new AnimationData();
+
+    /**
+     * アニメデータ保持クラス
+     */
+    public static class AnimationData{
+
+        private HashMap<String,String[][]> animationData = new HashMap<String,String[][]>();
+        private final String[] INIT_D = {"", "", ""};
+        private final String[][] INIT_DATA = {{"", "", ""}};
+
+        AnimationData(){
+
+            // 立っている
+            this.animationData.put("1", new String[][]{{String.valueOf(R.drawable.idle_r1),"700","900"}, {String.valueOf(R.drawable.idle_r2),"700","900"}});
+
+            // 右
+            this.animationData.put("2", new String[][]{{String.valueOf(R.drawable.walkright_r1),"700","900"}, {String.valueOf(R.drawable.walkright_r2),"700","900"}, {String.valueOf(R.drawable.walkright_r3),"700","900"}});
+
+            // 後ろ
+            this.animationData.put("3", new String[][]{{String.valueOf(R.drawable.walkback_r1),"700","900"}, {String.valueOf(R.drawable.walkback_r2),"700","900"}, {String.valueOf(R.drawable.walkback_r3),"700","900"}});
+
+            // 左
+            this.animationData.put("4", new String[][]{{String.valueOf(R.drawable.walkleft_r1),"700","900"}, {String.valueOf(R.drawable.walkleft_r2),"700","900"}, {String.valueOf(R.drawable.walkleft_r3),"700","900"}});
+
+            // 正面
+            this.animationData.put("5", new String[][]{{String.valueOf(R.drawable.walkfront_r1),"700","900"}, {String.valueOf(R.drawable.walkfront_r2),"700","900"}, {String.valueOf(R.drawable.walkfront_r3),"700","900"}});
+
+            // スマイルA(座り)
+            this.animationData.put("6", new String[][]{{String.valueOf(R.drawable.smile_a_r1),"700","700"}, {String.valueOf(R.drawable.smile_a_r2),"700","700"}, {String.valueOf(R.drawable.smile_a_r3),"700","700"}});
+
+            // スマイルB(座り)
+            this.animationData.put("7", new String[][]{{String.valueOf(R.drawable.smile_b_r1),"700","700"}, {String.valueOf(R.drawable.smile_b_r2),"700","700"}});
+
+            // スマイルC(座り)
+            this.animationData.put("8", new String[][]{{String.valueOf(R.drawable.smile_c_r1),"700","700"}, {String.valueOf(R.drawable.smile_c_r2),"700","700"}});
+
+            // スマイルD(座り)
+            this.animationData.put("9", new String[][]{{String.valueOf(R.drawable.smile_d_r1),"700","700"}, {String.valueOf(R.drawable.smile_d_r2),"700","700"},{String.valueOf(R.drawable.smile_d_r3),"700","700"}});
+
+            // びっくり
+            this.animationData.put("10", new String[][]{{String.valueOf(R.drawable.surprise_r1),"700","700"}, {String.valueOf(R.drawable.surprise_r2),"700","700"},{String.valueOf(R.drawable.surprise_r3),"700","700"}});
+
+            // はてな
+            this.animationData.put("11", new String[][]{{String.valueOf(R.drawable.question_r),"700","700"}});
+
+            // 困りA
+            this.animationData.put("12", new String[][]{{String.valueOf(R.drawable.trouble_a_r),"700","700"}});
+
+            // 困りB
+            this.animationData.put("13", new String[][]{{String.valueOf(R.drawable.trouble_b_r1),"700","700"}, {String.valueOf(R.drawable.trouble_b_r2),"700","700"},{String.valueOf(R.drawable.trouble_b_r3),"700","700"}});
+
+            // 困りC
+            this.animationData.put("14", new String[][]{{String.valueOf(R.drawable.trouble_c_r1),"700","700"}, {String.valueOf(R.drawable.trouble_c_r2),"700","700"},{String.valueOf(R.drawable.trouble_c_r3),"700","700"}});
+
+            // 渋い顔
+            this.animationData.put("15", new String[][]{{String.valueOf(R.drawable.bitter_r1),"700","700"}, {String.valueOf(R.drawable.bitter_r2),"700","700"},{String.valueOf(R.drawable.bitter_r3),"700","700"}});
+
+            // 睡眠
+            this.animationData.put("16", new String[][]{{String.valueOf(R.drawable.sleep_r2),"700","700"}, {String.valueOf(R.drawable.sleep_r2),"700","700"}});
+
+            // 目覚め
+            this.animationData.put("17", new String[][]{{String.valueOf(R.drawable.awake_r1),"700","700"}, {String.valueOf(R.drawable.awake_r2),"700","700"}});
+
+        }
+
+        /**
+         *
+         * @param key
+         * @return String[]
+         */
+        public String[][] get(String key){
+            if(this.animationData.get(key) != null) {
+                return this.animationData.get(key);
+            }else{
+                return INIT_DATA;
+            }
+        }
+
+        // 現在有効なanimation(keyで指定)のnumber番目の配列を取得する
+        public String[] getCurrentChild(String key, int number){
+            if(this.animationData.get(key) != null) {
+                return this.animationData.get(key)[number];
+            }else{
+                return INIT_D;
+            }
+        }
+
+    }
+
+
     @Override
     public void onStart(Intent intent, int startId) {
         super.onStart(intent, startId);
         mHnadler = new Handler();
+
+        startWalkCharacter();
+
+    }
+
+    /**
+     * タイマー
+     * アニメーションをする。
+     * 本メソッドでは、定期実行のみおこなう。
+     * 実処理自体は、別メソッドでおこなっている。
+     */
+    public void setTimer(){
+        mTimer = new Timer(true);
+        mTimer.schedule( new TimerTask(){
+            @Override
+            public void run() {
+                mHandler.post( new Runnable() {
+                    public void run() {
+                        // 設定されている種類に応じた画面遷移(アニメーション(=画像差し替え))
+                        update();
+                    }
+                });
+            }
+        }, 1000, MS);
+    }
+
+    private void update(){
+
+        // 表示すべき項目の表示
+        ImageView currentImage = (ImageView) view.findViewById(currentImageViewId);
+
+        // コマ数別
+        if(anime.get(currentType).length == 2){
+            currentImage.setImageResource(Integer.parseInt(
+                    anime.getCurrentChild(currentType, count % 2)[0]));
+        }else if(anime.get(currentType).length == 3){
+            currentImage.setImageResource(Integer.parseInt(
+                    anime.getCurrentChild(currentType, count % 3)[0]));
+        }
+
+        count++;
+
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
 
         // Viewからインフレータを作成する
         LayoutInflater layoutInflater = LayoutInflater.from(this);
@@ -73,196 +216,11 @@ public class ConciergeService extends Service {
         // Viewを画面上に重ね合わせする
         wm.addView(view, params);
 
-        startWalkCharacter();
-
         // 定期実行のタイマー設定
-        this.currentId = R.id.characterImageView;
+        this.currentImageViewId = R.id.characterImageView;
+
         setTimer();
 
-    }
-
-    /**
-     * タイマー
-     * アニメーションをする。
-     * 本メソッドでは、定期実行のみおこなう。
-     * 実処理自体は、別メソッドでおこなっている。
-     */
-    public void setTimer(){
-        mTimer = new Timer(true);
-        mTimer.schedule( new TimerTask(){
-            @Override
-            public void run() {
-                mHandler.post( new Runnable() {
-                    public void run() {
-                        // 設定されている種類に応じた画面遷移(アニメーション(=画像差し替え))
-                        chenge(currentType);
-                    }
-                });
-            }
-        }, 1000, 1000);
-    }
-
-    /**
-     * 表情を切り替える
-     *
-     * type:
-     *  0: 未定義（「1」を実行。）!!!!!未実装!!!!!!
-     *  1: 立ってる。スタンバイ状態。
-     *  2: 立ってる。歩いてる。!!!!!未実装!!!!!!
-     *  3: 座ってる。首振り。口が空いてる状態。ｹﾗｹﾗｹﾗって感じ。若干激しい首振り。
-     *  4: 座ってる。首振り。口が空いてる状態。ほほえみ顔。
-     *  5: 座ってる。首振り。口が空いてる状態。普通な感じ。
-     *  6: !!!!!未実装!!!!!!
-     *  7: !!!!!未実装!!!!!!
-     *
-     * @param type ☝︎参照
-     */
-    public void chenge(int type){
-
-        // typeに応じて呼び出すメソッドを変更する
-        switch (type){
-            case 0:
-                this._00();
-                break;
-            case 1:
-                this._01();
-                break;
-            case 2:
-                this._02();
-                break;
-            case 3:
-                this._03();
-                break;
-            case 4:
-                this._04();
-                break;
-            case 5:
-                this._05();
-                break;
-            default:
-                Log.d(TAG, "ERROR : " + type);
-                break;
-        }
-
-    }
-
-    /**
-     * 未定義につき、_01()を実行。
-     */
-    private void _00(){
-        _01();
-    }
-
-    /**
-     * 立ってる。アイドル状態に変更する
-     */
-    private void _01(){
-
-        // 表示すべき項目の表示
-        ImageView currentImage = (ImageView) view.findViewById(currentId);
-
-        if(count % 2 == 0) {
-            Log.d(TAG,"0");
-            currentImage.setImageResource(R.drawable.idle_r1);
-        }else{
-            Log.d(TAG,"1");
-            currentImage.setImageResource(R.drawable.idle_r2);
-        }
-
-        count++;
-    }
-
-    /**
-     * 立ってる。歩いてる。
-     */
-    private void _02(){
-        // TODO:変更
-        _01();
-    }
-
-    /**
-     * 座ってる。首振り。口が空いてる状態。ｹﾗｹﾗｹﾗって感じ。若干激しい首振り。
-     */
-    private void _03(){
-
-        // 表示すべき項目の表示
-        ImageView currentImage = (ImageView) view.findViewById(currentId);
-
-        if(count % 3 == 0) {
-            currentImage.setImageResource(R.drawable.smile_d_r1);
-        }else if(count %3 == 1){
-            currentImage.setImageResource(R.drawable.smile_d_r2);
-        }else{
-            currentImage.setImageResource(R.drawable.smile_d_r3);
-        }
-
-        count++;
-    }
-
-    /**
-     * 座ってる。首振り。口が空いてる状態。ほほえみ顔。
-     */
-    private void _04(){
-
-        // 表示すべき項目の表示
-        ImageView currentImage = (ImageView) view.findViewById(currentId);
-
-        if(count % 2 == 0) {
-            currentImage.setImageResource(R.drawable.smile_b_r1);
-        }else {
-            currentImage.setImageResource(R.drawable.smile_b_r2);
-        }
-
-        count++;
-
-    }
-
-    /**
-     * 座ってる。
-     */
-    private void _05(){
-
-        // 表示すべき項目の表示
-        ImageView currentImage = (ImageView) view.findViewById(currentId);
-
-        if(count % 2 == 0) {
-            currentImage.setImageResource(R.drawable.smile_c_r1);
-        }else {
-            currentImage.setImageResource(R.drawable.smile_c_r2);
-        }
-
-        count++;
-
-    }
-
-    /**
-     * 座ってる。未定義につき、_03();を実行
-     */
-    private void _06(){
-        //TODO:実装（取り敢えず画像待ち）
-        _03();
-    }
-
-    /**
-     * テストコード
-     */
-    public void testChange(){
-
-        // Success
-        this.chenge(0);
-        this.chenge(1);
-        this.chenge(2);
-        this.chenge(3);
-        this.chenge(4);
-
-        // Faild
-        this.chenge(100);
-
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
     }
 
     @Override
