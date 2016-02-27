@@ -4,12 +4,14 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 /**
  * Created by YKEI on 2016/02/27.
@@ -19,6 +21,7 @@ public class ConciergeService extends Service {
     private static final String TAG = "ConciergeService";
     View view;
     WindowManager wm;
+    private final Context context = this;
 
     @Override
     public void onStart(Intent intent, int startId) {
@@ -48,20 +51,68 @@ public class ConciergeService extends Service {
 
         // レイアウトファイルから重ね合わせするViewを作成する
         view = layoutInflater.inflate(R.layout.overlay, null);
+        ImageView image = (ImageView) view.findViewById(R.id.saize);
+        image.setVisibility(View.INVISIBLE);
+        addView(view);
 
 
-        testChange();
+//        testChange();
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "run");
+                removeView();
+                LayoutInflater layoutInflater = LayoutInflater.from(context);
+                view = layoutInflater.inflate(R.layout.overlay, null);
+                ImageView image = (ImageView) view.findViewById(R.id.unity_chan_walk);
+                image.setVisibility(View.INVISIBLE);
+                addView(view);
+            }
+        }, 500);
 
 
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "run");
+                removeView();
+                LayoutInflater layoutInflater = LayoutInflater.from(context);
+                view = layoutInflater.inflate(R.layout.overlay, null);
+                ImageView image = (ImageView) view.findViewById(R.id.unity_chan_walk);
+                image.setVisibility(View.INVISIBLE);
+                addView(view);
+            }
+        }, 1500);
 
-        Log.d(TAG, "onStart start 040");
+    }
+
+    private void addView(View view){
+
+        // Viewからインフレータを作成する
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+
+        // 重ね合わせするViewの設定を行う
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
+                WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
+                PixelFormat.TRANSLUCENT);
+
+        // WindowManagerを取得する
+        wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
 
         // Viewを画面上に重ね合わせする
         wm.addView(view, params);
 
-        Log.d(TAG, "onStart end");
-
     }
+
+    private void removeView(){
+        wm.removeView(view);
+    }
+
+
 
     /**
      * 表情を切り替える
