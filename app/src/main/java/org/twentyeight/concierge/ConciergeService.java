@@ -4,12 +4,17 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by YKEI on 2016/02/27.
@@ -21,10 +26,15 @@ public class ConciergeService extends Service {
     private View view;
     private WindowManager wm;
     WindowManager.LayoutParams params;
+    Handler mHnadler;
+    private int mWalkCounter;
+    private static final int WALK_COUNT_MAX = 120;
+    private Timer mWalkTimer;
 
     @Override
     public void onStart(Intent intent, int startId) {
         super.onStart(intent, startId);
+        mHnadler = new Handler();
 
         Log.d(TAG, "onStart start");
 
@@ -53,7 +63,7 @@ public class ConciergeService extends Service {
         wm.addView(view, params);
 
         Log.d(TAG, "onStart end");
-
+        startWalkCharacter();
     }
 
     @Override
@@ -124,5 +134,43 @@ public class ConciergeService extends Service {
             // イベント処理完了
             return true;
         }
+    }
+
+    private void startWalkCharacter() {
+        mWalkCounter = 0;
+        mWalkTimer = new Timer();
+        Random random = new Random();
+        final double degrees = (double)random.nextInt(360);
+        final double radian = Math.toRadians(degrees);
+        Log.i(TAG, "degree:" + degrees);
+        mWalkTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (mWalkCounter < WALK_COUNT_MAX) {
+                    walkCharacterOneStep(radian);
+                    mWalkCounter++;
+                } else {
+                    mWalkTimer.cancel();
+                }
+            }
+        }, 16, 16);
+    }
+
+    /**
+     * キャラを歩かせる
+     */
+    private void walkCharacterOneStep(final double radian) {
+        mHnadler.post(new Runnable() {
+            @Override
+            public void run() {
+//                Log.i(TAG, "rad : " + radian);
+//                Log.i(TAG, "x,y : " + params.x + "," + params.y);
+                int deltaX = (int) (2 * Math.cos(radian));
+                int deltaY = (int) (2 * Math.sin(radian));
+                params.x += deltaX;
+                params.y += deltaY;
+                wm.updateViewLayout(view, params);
+            }
+        });
     }
 }
