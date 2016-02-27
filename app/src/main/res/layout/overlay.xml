@@ -8,8 +8,18 @@
     <ImageView
         android:layout_width="235dp"
         android:layout_height="wrap_content"
+        android:id="@+id/saize"
+        android:layout_gravity="center_horizontal"
+        android:background="@mipmap/saize"
+        android:layout_weight="0.07" />
+
+    <ImageView
+        android:layout_width="235dp"
+        android:layout_height="wrap_content"
         android:id="@+id/unity_chan_walk"
         android:layout_gravity="center_horizontal"
         android:background="@mipmap/unity_chan_walk"
         android:layout_weight="0.07" />
+
+
 </LinearLayout>
