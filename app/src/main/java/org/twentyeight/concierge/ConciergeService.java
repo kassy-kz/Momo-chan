@@ -112,32 +112,7 @@ public class ConciergeService extends Service {
         }, 1000, 1000);
 
     }
-
-    public class AnimationDetail{
-        private int ms = 0;
-        private int id = 0;
-        AnimationDetail(){
-
-        }
-        public void setDelay(int ms){
-            this.ms = ms;
-        }
-        public void setImageView(int id){
-            this.id = id;
-        }
-    }
-
-    private void addView(View view){
-
-
-    }
-
-    private void removeView(){
-        wm.removeView(view);
-    }
-
-
-
+    
     /**
      * 表情を切り替える
      * @param type 0: １: 2:
