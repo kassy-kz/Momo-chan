@@ -51,23 +51,22 @@ public class ConciergeService extends Service {
 
         // レイアウトファイルから重ね合わせするViewを作成する
         view = layoutInflater.inflate(R.layout.overlay, null);
-        ImageView image = (ImageView) view.findViewById(R.id.saize);
-        image.setVisibility(View.INVISIBLE);
-        addView(view);
+
+        // WindowManagerを取得する
+        wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+
+        // Viewを画面上に重ね合わせする
+        wm.addView(view, params);
 
 
 //        testChange();
+
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                Log.d(TAG, "run");
-                removeView();
-                LayoutInflater layoutInflater = LayoutInflater.from(context);
-                view = layoutInflater.inflate(R.layout.overlay, null);
                 ImageView image = (ImageView) view.findViewById(R.id.unity_chan_walk);
-                image.setVisibility(View.INVISIBLE);
-                addView(view);
+                image.setVisibility(View.VISIBLE);
             }
         }, 500);
 
@@ -76,35 +75,24 @@ public class ConciergeService extends Service {
             @Override
             public void run() {
                 Log.d(TAG, "run");
-                removeView();
-                LayoutInflater layoutInflater = LayoutInflater.from(context);
-                view = layoutInflater.inflate(R.layout.overlay, null);
                 ImageView image = (ImageView) view.findViewById(R.id.unity_chan_walk);
                 image.setVisibility(View.INVISIBLE);
-                addView(view);
             }
         }, 1500);
+
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "run");
+                ImageView image = (ImageView) view.findViewById(R.id.unity_chan_walk);
+                image.setVisibility(View.VISIBLE);
+            }
+        }, 2000);
 
     }
 
     private void addView(View view){
 
-        // Viewからインフレータを作成する
-        LayoutInflater layoutInflater = LayoutInflater.from(this);
-
-        // 重ね合わせするViewの設定を行う
-        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
-                WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
-                PixelFormat.TRANSLUCENT);
-
-        // WindowManagerを取得する
-        wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-
-        // Viewを画面上に重ね合わせする
-        wm.addView(view, params);
 
     }
 
