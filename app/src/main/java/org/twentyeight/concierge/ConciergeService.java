@@ -12,6 +12,10 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import java.lang.reflect.Array;
 
 /**
  * Created by YKEI on 2016/02/27.
@@ -19,9 +23,22 @@ import android.widget.LinearLayout;
 public class ConciergeService extends Service {
 
     private static final String TAG = "ConciergeService";
+    private final Context context = this;
+
     View view;
     WindowManager wm;
-    private final Context context = this;
+
+    // 現在表示したいID(R.id.hoge)
+    private int currentId = 0;
+
+    // 以前表示していたID(R.id.hoge)
+    private int oldId = 0;
+
+    Timer   mTimer   = null;
+    Handler mHandler = new Handler();
+
+    private int count = 0;
+
 
     @Override
     public void onStart(Intent intent, int startId) {
@@ -52,35 +69,92 @@ public class ConciergeService extends Service {
 
 
 //        testChange();
+//        addHandler(500, R.id.idle_r1);
+//
+//        addHandler(2500, R.id.idle_r1);
+//        addHandler(3500, R.id.idle_r2);
+//        addHandler(4500, R.id.idle_r1);
 
+        this.currentId = R.id.characterImageView;
+        setTimer();
+
+
+    }
+
+
+    public void setTimer(){
+
+        mTimer = new Timer(true);
+        mTimer.schedule( new TimerTask(){
+            @Override
+            public void run() {
+
+                mHandler.post( new Runnable() {
+                    public void run() {
+
+                        // 表示すべき項目の表示
+                        ImageView currentImage = (ImageView) view.findViewById(currentId);
+
+                        if(count % 2 == 0) {
+                            Log.d(TAG,"0");
+                            currentImage.setImageResource(R.drawable.idle_r1);
+                        }else{
+                            Log.d(TAG,"1");
+                            currentImage.setImageResource(R.drawable.idle_r2);
+                        }
+
+                        count++;
+
+                    }
+                });
+
+            }
+        }, 1000, 1000);
+
+    }
+
+    /**
+     * 遅延処理を追加する.
+     * 遅延時間と遅延後表示するIDを渡すこと
+     *
+     * @param ms 遅延時間
+     * @param current 表示対象ID(R.id.hoge)
+     */
+    private void addHandler(int ms, final int current){
+        this.oldId = this.currentId;
+        this.currentId = current;
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                ImageView image = (ImageView) view.findViewById(R.id.unity_chan_walk);
-                image.setVisibility(View.VISIBLE);
+                Log.d("あああ"," ああああ, old:" + oldId + ", new:" + currentId);
+
+                // 非表示にすべき項目の非表示
+                ImageView oldImage = (ImageView) view.findViewById(oldId);
+                oldImage.setVisibility(View.INVISIBLE);
+
+                // 表示すべき項目の表示
+                ImageView currentImage = (ImageView) view.findViewById(currentId);
+                currentImage.setVisibility(View.VISIBLE);
+                currentImage.setImageResource(R.drawable.idle_r1);
+
             }
-        }, 500);
+        }, ms);
+    }
 
 
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(TAG, "run");
-                ImageView image = (ImageView) view.findViewById(R.id.unity_chan_walk);
-                image.setVisibility(View.INVISIBLE);
-            }
-        }, 1500);
+    public class AnimationDetail{
+        private int ms = 0;
+        private int id = 0;
+        AnimationDetail(){
 
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(TAG, "run");
-                ImageView image = (ImageView) view.findViewById(R.id.unity_chan_walk);
-                image.setVisibility(View.VISIBLE);
-            }
-        }, 2000);
-
+        }
+        public void setDelay(int ms){
+            this.ms = ms;
+        }
+        public void setImageView(int id){
+            this.id = id;
+        }
     }
 
     private void addView(View view){
@@ -131,12 +205,6 @@ public class ConciergeService extends Service {
      */
     private void _01(){
 
-        // MEMO:サンプル実装
-        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.overlay, null);
-        ImageView image = (ImageView) view.findViewById(R.id.unity_chan_walk);
-        image.setVisibility(View.INVISIBLE);
-
     }
 
     public void testChange(){
@@ -172,5 +240,36 @@ public class ConciergeService extends Service {
         // TODO Auto-generated method stub
         return null;
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }

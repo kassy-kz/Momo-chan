@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
@@ -7,20 +7,20 @@
     android:weightSum="1">
 
     <ImageView
-        android:layout_width="235dp"
-        android:layout_height="wrap_content"
-        android:id="@+id/saize"
+        android:layout_width="105dp"
+        android:layout_height="135dp"
+        android:id="@+id/characterImageView"
         android:layout_gravity="center_horizontal"
-        android:background="@mipmap/saize"
-        android:layout_weight="0.07" />
+        android:src="@drawable/idle_r1"
+        />
 
-    <ImageView
-        android:layout_width="235dp"
-        android:layout_height="wrap_content"
-        android:id="@+id/unity_chan_walk"
-        android:layout_gravity="center_horizontal"
-        android:background="@mipmap/unity_chan_walk"
-        android:layout_weight="0.07" />
+    <!--<ImageView-->
+        <!--android:layout_width="105dp"-->
+        <!--android:layout_height="135dp"-->
+        <!--android:id="@+id/idle_r2"-->
+        <!--android:layout_gravity="center_horizontal"-->
+        <!--android:src="@drawable/idle_r2"-->
+        <!--android:background="#a64242" />-->
 
 
-</LinearLayout>
+</FrameLayout>
