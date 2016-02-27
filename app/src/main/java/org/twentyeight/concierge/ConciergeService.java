@@ -195,11 +195,11 @@ public class ConciergeService extends Service {
         ImageView currentImage = (ImageView) view.findViewById(currentId);
 
         if(count % 3 == 0) {
-            currentImage.setImageResource(R.drawable.smileD_r1);
+            currentImage.setImageResource(R.drawable.smile_d_r1);
         }else if(count %3 == 1){
-            currentImage.setImageResource(R.drawable.smileD_r2);
+            currentImage.setImageResource(R.drawable.smile_d_r2);
         }else{
-            currentImage.setImageResource(R.drawable.smileD_r3);
+            currentImage.setImageResource(R.drawable.smile_d_r3);
         }
 
         count++;
@@ -214,9 +214,9 @@ public class ConciergeService extends Service {
         ImageView currentImage = (ImageView) view.findViewById(currentId);
 
         if(count % 2 == 0) {
-            currentImage.setImageResource(R.drawable.smileB_r1);
+            currentImage.setImageResource(R.drawable.smile_b_r1);
         }else {
-            currentImage.setImageResource(R.drawable.smileB_r2);
+            currentImage.setImageResource(R.drawable.smile_b_r2);
         }
 
         count++;
@@ -232,9 +232,9 @@ public class ConciergeService extends Service {
         ImageView currentImage = (ImageView) view.findViewById(currentId);
 
         if(count % 2 == 0) {
-            currentImage.setImageResource(R.drawable.smileC_r1);
+            currentImage.setImageResource(R.drawable.smile_c_r1);
         }else {
-            currentImage.setImageResource(R.drawable.smileC_r2);
+            currentImage.setImageResource(R.drawable.smile_c_r2);
         }
 
         count++;
@@ -263,7 +263,7 @@ public class ConciergeService extends Service {
 
         // Faild
         this.chenge(100);
-        
+
     }
 
     @Override
