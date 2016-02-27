@@ -78,7 +78,6 @@ public class ConciergeService extends Service {
         this.currentId = R.id.characterImageView;
         setTimer();
 
-
     }
 
 
