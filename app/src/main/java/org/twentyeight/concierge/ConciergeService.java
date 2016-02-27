@@ -12,15 +12,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import java.lang.reflect.Array;
-
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * Created by YKEI on 2016/02/27.
