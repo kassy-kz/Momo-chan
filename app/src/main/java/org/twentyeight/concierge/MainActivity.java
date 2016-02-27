@@ -6,11 +6,14 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final String TAG = "ConciergeMainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +34,13 @@ public class MainActivity extends AppCompatActivity {
         // NotificationListenerServiceを立ち上げる
         Intent serviceIntent = new Intent(this, MyNotificationListenerService.class);
         startService(serviceIntent);
+
+        // ConciergeService 起動
+        Log.d(TAG,"起動");
+        startService(new Intent(MainActivity.this, ConciergeService.class));
+//        Intent intent = new Intent(this, ConciergeService.class);
+//        startService(intent);
+
     }
 
     @Override
