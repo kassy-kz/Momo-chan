@@ -37,8 +37,7 @@ public class ConciergeService extends Service {
                 WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
-                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL|
-                WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
                 PixelFormat.TRANSLUCENT);
 
         Log.d(TAG, "onStart start 020");
@@ -50,8 +49,9 @@ public class ConciergeService extends Service {
 
         // レイアウトファイルから重ね合わせするViewを作成する
         view = layoutInflater.inflate(R.layout.overlay, null);
+        ImageView characterView = (ImageView) view.findViewById(R.id.unity_chan_walk);
 
-        view.setOnTouchListener(new DragViewListener(view));
+        characterView.setOnTouchListener(new DragViewListener(characterView));
         Log.d(TAG, "onStart start 040");
 
         // Viewを画面上に重ね合わせする
@@ -94,6 +94,7 @@ public class ConciergeService extends Service {
 
         @Override
         public boolean onTouch(View view, MotionEvent event) {
+            Log.i(TAG, "onTouch =========================== " + event.getAction());
             // タッチしている位置取得
             int x = (int) event.getRawX();
             int y = (int) event.getRawY();
