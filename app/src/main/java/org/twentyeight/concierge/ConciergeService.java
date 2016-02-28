@@ -291,6 +291,8 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
 
         private int dragStartX = 0;
         private int dragStartY = 0;
+        private int downX = 0;
+        private int downY = 0;
 
         public DragViewListener(View dragView) {
             this.dragView = dragView;
@@ -308,6 +310,8 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
             // 画像と重ならなければスルーする
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
+                    downX = x;
+                    downY = y;
                     dragStartX = x;
                     dragStartY = y;
                     Log.i(TAG, "first params " + params.x + ","+params.y);
@@ -322,6 +326,11 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
                     dragStartX = x;
                     dragStartY = y;
                     Log.i(TAG, "update params " + params.x + ","+params.y);
+                    break;
+                case MotionEvent.ACTION_UP:
+                    if (Math.abs(downX - x) < 8 && Math.abs(downY - y) < 8) {
+                        speechText("ももちゃんだよ");
+                    }
                     break;
             }
             // 今回のタッチ位置を保持
@@ -347,6 +356,7 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
                     mWalkCounter++;
                 } else {
                     mWalkTimer.cancel();
+                    currentType = "10";
                 }
             }
         }, 16, 16);
