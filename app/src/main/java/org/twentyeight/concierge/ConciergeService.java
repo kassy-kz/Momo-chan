@@ -407,12 +407,28 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
         }
     }
 
+    /**
+     * キャラを歩かせる
+     */
     private void startWalkCharacter() {
         mWalkCounter = 0;
         mWalkTimer = new Timer();
         Random random = new Random();
         final double degrees = (double)random.nextInt(360);
         final double radian = Math.toRadians(degrees);
+
+        if (degrees < 45) {
+            currentType = "4";
+        } else if (degrees < 135) {
+            currentType = "5";
+        } else if (degrees < 225) {
+            currentType = "2";
+        } else if (degrees < 315) {
+            currentType = "3";
+        } else {
+            currentType = "4";
+        }
+
         mWalkTimer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -421,11 +437,9 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
                     mWalkCounter++;
                 } else {
                     mWalkTimer.cancel();
-                    if(currentTypeInt < 18) {
-                        currentTypeInt++;
-                    } else {
-                        currentTypeInt = 1;
-                    }
+                    Random random = new Random();
+                    currentTypeInt = random.nextInt(13) + 6;
+                    Log.i(TAG, "random type : " + currentTypeInt);
                     currentType = currentTypeInt + "";
                 }
             }
