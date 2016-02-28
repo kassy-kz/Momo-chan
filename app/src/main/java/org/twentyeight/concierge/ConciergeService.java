@@ -170,7 +170,7 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
             public void run() {
                 startWalkCharacter();
             }
-        }, 5000, 5000);
+        }, 10000, 10000);
     }
 
     /**
@@ -258,6 +258,12 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
                         speechVoice(R.raw.trg_kindle);
                     } else if ("com.google.android.music".equals(app)) {
                         speechVoice(R.raw.trg_musicappstart);
+                    } else if ("com.google.android.GoogleCamera".equals(app)) {
+                        speechVoice(R.raw.trg_camera_on);
+                    } else if ("com.android.chrome".equals(app)) {
+                        speechVoice(R.raw.trg_browser);
+                    } else if ("jp.naver.line.android".equals(app)) {
+                        speechVoice(R.raw.trg_line_app_start);
                     }
                 }
             }
@@ -348,7 +354,22 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
                     break;
                 case MotionEvent.ACTION_UP:
                     if (Math.abs(downX - x) < 8 && Math.abs(downY - y) < 8) {
-                        speechVoice(R.raw.trg_sleep_off);
+                        Random random = new Random();
+                        int rand = random.nextInt(4);
+                        switch (rand) {
+                            case 0:
+                                speechVoice(R.raw.trg_sleep_off);
+                                break;
+                            case 1:
+                                speechVoice(R.raw.trg_random_nodo);
+                                break;
+                            case 2:
+                                speechVoice(R.raw.trg_random_soba);
+                                break;
+                            case 3:
+                                speechVoice(R.raw.trg_sleep_off);
+                                break;
+                        }
                     }
                     break;
             }

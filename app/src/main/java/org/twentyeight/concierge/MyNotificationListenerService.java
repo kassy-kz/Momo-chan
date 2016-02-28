@@ -67,6 +67,7 @@ public class MyNotificationListenerService extends NotificationListenerService i
         registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED));
         registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_HEADSET_PLUG));
         registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_POWER_CONNECTED));
+        registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_CAMERA_BUTTON));
 
         return START_STICKY;
     }
@@ -130,7 +131,7 @@ public class MyNotificationListenerService extends NotificationListenerService i
         }
         // Twitterの場合
         else if("com.twitter.android".equals(packageName)) {
-            Log.i(TAG,"app: twitter");
+            Log.i(TAG, "app: twitter");
             speechVoice(R.raw.trg_twitter);
         }
         // LINEの場合
