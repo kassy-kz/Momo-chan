@@ -264,6 +264,18 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
                         speechVoice(R.raw.trg_browser);
                     } else if ("jp.naver.line.android".equals(app)) {
                         speechVoice(R.raw.trg_line_app_start);
+                    } else if ("com.android.providers.downloads".equals(app)) {
+                        speechVoice(R.raw.trg_searchappli);
+                    } else if ("jp.co.rakuten.kobo".equals(app)) {
+                        speechVoice(R.raw.trg_kobo);
+                    } else if ("jp.co.rakuten.appmarket".equals(app)) {
+                        speechVoice(R.raw.trg_rakuten);
+                    } else if ("com.google.android.apps.maps".equals(app)) {
+                        speechVoice(R.raw.trg_map_dokoikuno);
+                    } else if ("jp.co.yahoo.android.apps.transit".equals(app)) {
+                        speechVoice(R.raw.trg_norikae_next);
+                    } else if ("jp.co.jorudan.nrkj".equals(app)) {
+                        speechVoice(R.raw.trg_norikae_next);
                     }
                 }
             }
