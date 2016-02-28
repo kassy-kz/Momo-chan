@@ -318,7 +318,7 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
             // タッチしている位置取得
             int x = (int) event.getRawX();
             int y = (int) event.getRawY();
-            Log.i(TAG, "onTouch " + event.getAction() +" x,y : " + x + "," + y);
+//            Log.i(TAG, "onTouch " + event.getAction() +" x,y : " + x + "," + y);
 
             // 画像と重ならなければスルーする
             switch (event.getAction()) {
@@ -327,7 +327,7 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
                     downY = y;
                     dragStartX = x;
                     dragStartY = y;
-                    Log.i(TAG, "first params " + params.x + ","+params.y);
+//                    Log.i(TAG, "first params " + params.x + ","+params.y);
                     break;
                 case MotionEvent.ACTION_MOVE:
                     // 今回イベントでのView移動先の位置
@@ -338,7 +338,7 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
                     wm.updateViewLayout(view, params);
                     dragStartX = x;
                     dragStartY = y;
-                    Log.i(TAG, "update params " + params.x + ","+params.y);
+//                    Log.i(TAG, "update params " + params.x + ","+params.y);
                     break;
                 case MotionEvent.ACTION_UP:
                     if (Math.abs(downX - x) < 8 && Math.abs(downY - y) < 8) {
