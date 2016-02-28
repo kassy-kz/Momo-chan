@@ -284,6 +284,17 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
 
         // サービスが破棄されるときには重ね合わせしていたViewを削除する
         wm.removeView(view);
+
+        // タイマー全部破棄
+        if (mWalkStartTimer != null) {
+            mWalkStartTimer.cancel();
+        }
+        if (mWalkTimer != null) {
+            mWalkTimer.cancel();
+        }
+        if (mAppUsageTimer != null) {
+            mAppUsageTimer.cancel();
+        }
     }
 
     @Override

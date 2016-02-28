@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingBottom="@dimen/activity_vertical_margin"
@@ -13,8 +14,16 @@
     tools:context="org.twentyeight.concierge.MainActivity"
     tools:showIn="@layout/activity_main">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"/>
-</RelativeLayout>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:id="@+id/btnStartService"
+        android:textSize="32sp"
+        android:text="ももちゃん登場"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:textSize="32sp"
+        android:id="@+id/btnStopService"
+        android:text="ももちゃん退場"/>
+</LinearLayout>

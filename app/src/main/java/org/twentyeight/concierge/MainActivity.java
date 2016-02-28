@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 
 /**
  * 大前提！
@@ -39,12 +40,23 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        Button btnStart = (Button) findViewById(R.id.btnStartService);
+        btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+            public void onClick(View v) {
+                Log.d(TAG, "サービス起動");
+                startService(new Intent(MainActivity.this, ConciergeService.class));
+                Intent serviceIntent = new Intent(MainActivity.this, MyNotificationListenerService.class);
+                startService(serviceIntent);
+            }
+        });
+
+        Button btnStop = (Button) findViewById(R.id.btnStopService);
+        btnStop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                stopService(new Intent(MainActivity.this, ConciergeService.class));
+                stopService(new Intent(MainActivity.this, MyNotificationListenerService.class));
             }
         });
 
@@ -66,10 +78,10 @@ public class MainActivity extends AppCompatActivity {
             Log.i(TAG, "already granted");
             // ConciergeService 起動
             if (isUsageStatsAllowed()) {
-                Log.d(TAG, "サービス起動");
-                startService(new Intent(MainActivity.this, ConciergeService.class));
-                Intent serviceIntent = new Intent(this, MyNotificationListenerService.class);
-                startService(serviceIntent);
+//                Log.d(TAG, "サービス起動");
+//                startService(new Intent(MainActivity.this, ConciergeService.class));
+//                Intent serviceIntent = new Intent(this, MyNotificationListenerService.class);
+//                startService(serviceIntent);
             } else {
                 checkAppUsagePermission();
             }
@@ -151,10 +163,10 @@ public class MainActivity extends AppCompatActivity {
         }
         // 7. notiの許可もらった
         else if (requestCode == REQUEST_CODE_NOTI) {
-            Log.d(TAG,"サービス起動");
-            startService(new Intent(MainActivity.this, ConciergeService.class));
-            Intent serviceIntent = new Intent(this, MyNotificationListenerService.class);
-            startService(serviceIntent);
+//            Log.d(TAG,"サービス起動");
+//            startService(new Intent(MainActivity.this, ConciergeService.class));
+//            Intent serviceIntent = new Intent(this, MyNotificationListenerService.class);
+//            startService(serviceIntent);
         }
     }
 }
