@@ -251,7 +251,13 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
                     Log.i(TAG, "app : " +  app);
                     mBeforeApp = app;
                     if ("com.google.android.dialer".equals(app)) {
-                        speechText("電話かけるの");
+                        speechVoice(R.raw.trg_phoneappstart);
+                    } else if ("com.google.android.gm".equals(app)) {
+                        speechVoice(R.raw.trg_mail_app_start);
+                    } else if ("com.amazon.kindle".equals(app)) {
+                        speechVoice(R.raw.trg_kindle);
+                    } else if ("com.google.android.music".equals(app)) {
+                        speechVoice(R.raw.trg_musicappstart);
                     }
                 }
             }
@@ -318,7 +324,7 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
             // タッチしている位置取得
             int x = (int) event.getRawX();
             int y = (int) event.getRawY();
-            Log.i(TAG, "onTouch " + event.getAction() +" x,y : " + x + "," + y);
+//            Log.i(TAG, "onTouch " + event.getAction() +" x,y : " + x + "," + y);
 
             // 画像と重ならなければスルーする
             switch (event.getAction()) {
@@ -327,7 +333,7 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
                     downY = y;
                     dragStartX = x;
                     dragStartY = y;
-                    Log.i(TAG, "first params " + params.x + ","+params.y);
+//                    Log.i(TAG, "first params " + params.x + ","+params.y);
                     break;
                 case MotionEvent.ACTION_MOVE:
                     // 今回イベントでのView移動先の位置
@@ -338,11 +344,11 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
                     wm.updateViewLayout(view, params);
                     dragStartX = x;
                     dragStartY = y;
-                    Log.i(TAG, "update params " + params.x + ","+params.y);
+//                    Log.i(TAG, "update params " + params.x + ","+params.y);
                     break;
                 case MotionEvent.ACTION_UP:
                     if (Math.abs(downX - x) < 8 && Math.abs(downY - y) < 8) {
-                        speechVoice("");
+                        speechVoice(R.raw.trg_sleep_off);
                     }
                     break;
             }
@@ -434,6 +440,21 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
                 currentType = "0";
             }
         });
+        mMediaPlayer.start();
+    }
+
+    private void speechVoice(int resId) {
+        if (mMediaPlayer == null) {
+            mMediaPlayer = MediaPlayer.create(this, resId);
+            mMediaPlayer.start();
+            return;
+        }
+        if (mMediaPlayer.isPlaying()) {
+            mMediaPlayer.stop();
+//            mMediaPlayer.prepare();
+        }
+        Log.i(TAG, "speech voice");
+        mMediaPlayer = MediaPlayer.create(this, resId);
         mMediaPlayer.start();
     }
 }

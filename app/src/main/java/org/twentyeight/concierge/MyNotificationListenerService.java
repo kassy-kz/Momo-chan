@@ -4,8 +4,10 @@ import android.annotation.TargetApi;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -22,6 +24,10 @@ public class MyNotificationListenerService extends NotificationListenerService i
     private NotificationCompat.Builder mNotificationBuilder;
     private static final int NOTIFICATION_ID = 0;
     private TextToSpeech mTts;
+    private MyReceiver mReceiver;
+
+    // 音声再生
+    MediaPlayer mMediaPlayer = null;
 
     /**
      * onCreate
@@ -52,7 +58,15 @@ public class MyNotificationListenerService extends NotificationListenerService i
         Log.i(TAG, "mynotificationlistener start");
         showNotification();
 
-        speechText("通知を待ち受けます");
+//        speechText("通知を待ち受けます");
+        speechVoice(R.raw.trg_sleep_off);
+
+        mReceiver = new MyReceiver(this);
+        registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_SCREEN_ON));
+        registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+        registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED));
+        registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_HEADSET_PLUG));
+        registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_POWER_CONNECTED));
 
         return START_STICKY;
     }
@@ -60,8 +74,9 @@ public class MyNotificationListenerService extends NotificationListenerService i
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.i(TAG,"mynotificationlistener stop");
+        Log.i(TAG, "mynotificationlistener stop");
         deleteNotification();
+        unregisterReceiver(mReceiver);
     }
 
     /**
@@ -69,7 +84,7 @@ public class MyNotificationListenerService extends NotificationListenerService i
       */
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
-        Log.i(TAG,"onNotificationPosted");
+        Log.i(TAG, "onNotificationPosted");
         // 通知内容をログに出力する
         showLog(sbn);
     }
@@ -111,20 +126,17 @@ public class MyNotificationListenerService extends NotificationListenerService i
         // Gmailの場合
         if("com.google.android.gm".equals(packageName)) {
             Log.i(TAG, "app: Gmail");
-            String message1  = "メールが届きました";
-            speechText(message1);
+            speechVoice(R.raw.trg_mail_recieve_3);
         }
         // Twitterの場合
         else if("com.twitter.android".equals(packageName)) {
             Log.i(TAG,"app: twitter");
-            String message1  = "twitterのメンションです";
-            speechText(message1);
+            speechVoice(R.raw.trg_twitter);
         }
         // LINEの場合
         else if("jp.naver.line.android".equals(packageName)) {
-            Log.i(TAG,"app: LINE");
-            String message1  = "ラインのメッセージです";
-            speechText(message1);
+            Log.i(TAG, "app: LINE");
+            speechVoice(R.raw.trg_line);
         }
         // その他
         else {
@@ -192,5 +204,21 @@ public class MyNotificationListenerService extends NotificationListenerService i
             // 読み上げ開始
             mTts.speak(str, TextToSpeech.QUEUE_FLUSH, null, null);
         }
+    }
+
+
+    private void speechVoice(int resId) {
+        if (mMediaPlayer == null) {
+            mMediaPlayer = MediaPlayer.create(this, resId);
+            mMediaPlayer.start();
+            return;
+        }
+        if (mMediaPlayer.isPlaying()) {
+            mMediaPlayer.stop();
+//            mMediaPlayer.prepare();
+        }
+        Log.i(TAG, "speech voice");
+        mMediaPlayer = MediaPlayer.create(this, resId);
+        mMediaPlayer.start();
     }
 }
