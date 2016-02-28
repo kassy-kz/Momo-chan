@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
@@ -22,6 +23,7 @@ public class MyNotificationListenerService extends NotificationListenerService i
     private NotificationCompat.Builder mNotificationBuilder;
     private static final int NOTIFICATION_ID = 0;
     private TextToSpeech mTts;
+    private MyReceiver mReceiver;
 
     /**
      * onCreate
@@ -54,14 +56,22 @@ public class MyNotificationListenerService extends NotificationListenerService i
 
         speechText("通知を待ち受けます");
 
+        mReceiver = new MyReceiver(this);
+        registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_SCREEN_ON));
+        registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+        registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED));
+        registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_HEADSET_PLUG));
+        registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_POWER_CONNECTED));
+
         return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.i(TAG,"mynotificationlistener stop");
+        Log.i(TAG, "mynotificationlistener stop");
         deleteNotification();
+        unregisterReceiver(mReceiver);
     }
 
     /**
