@@ -124,6 +124,9 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
             // 目覚め
             this.animationData.put("17", new String[][]{{String.valueOf(R.drawable.awake_r1),"700","700"}, {String.valueOf(R.drawable.awake_r2),"700","700"}});
 
+            // 口パク
+            this.animationData.put("18", new String[][]{{String.valueOf(R.drawable.smile_d_r1),"700","700"}, {String.valueOf(R.drawable.smile_a_r2),"700","700"}});
+            
         }
 
         /**
