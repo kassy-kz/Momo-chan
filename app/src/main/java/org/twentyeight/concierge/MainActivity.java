@@ -2,6 +2,9 @@ package org.twentyeight.concierge;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.AppOpsManager;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -22,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "ConciergeMainActivity";
     private static final int RC_HANDLE_PERMISSION = 1;
     private static final int REQUEST_CODE = 2;
+    private static final int REQUEST_CODE_P1 = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,8 +63,12 @@ public class MainActivity extends AppCompatActivity {
         else {
             Log.i(TAG, "already granted");
             // ConciergeService 起動
-            Log.d(TAG,"起動");
-            startService(new Intent(MainActivity.this, ConciergeService.class));
+            if (isUsageStatsAllowed()) {
+                Log.d(TAG, "起動");
+                startService(new Intent(MainActivity.this, ConciergeService.class));
+            } else {
+                checkAppUsagePermission();
+            }
         }
     }
 
@@ -77,6 +85,33 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * アプリUsageの許可を取りに行く
+     */
+    @TargetApi(Build.VERSION_CODES.M)
+    public void checkAppUsagePermission() {
+        // まだ
+        if (!isUsageStatsAllowed()) {
+            startActivityForResult(new Intent("android.settings.USAGE_ACCESS_SETTINGS"), REQUEST_CODE_P1);
+        }
+        // もらってる
+        else {
+            Log.d(TAG,"起動");
+            startService(new Intent(MainActivity.this, ConciergeService.class));
+        }
+    }
+
+    /**
+     * 自分アプリがUsage許可もらってるかどうか
+     * @return
+     */
+    private boolean isUsageStatsAllowed() {
+        AppOpsManager appOps = (AppOpsManager) getSystemService(Context.APP_OPS_SERVICE);
+        int uid = android.os.Process.myUid();
+        int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, uid, getPackageName());
+        return  mode == AppOpsManager.MODE_ALLOWED;
+    }
+
+    /**
      * パーミッション尋ねた結果
      * @param requestCode
      * @param resultCode
@@ -87,24 +122,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode,  Intent data) {
         if (requestCode == REQUEST_CODE) {
             if (Settings.canDrawOverlays(this)) {
-                Log.d(TAG,"起動");
-                startService(new Intent(MainActivity.this, ConciergeService.class));
+                checkAppUsagePermission();
             }
+        } else if (requestCode == REQUEST_CODE_P1) {
+            Log.d(TAG,"起動");
+            startService(new Intent(MainActivity.this, ConciergeService.class));
         }
-    }
-    /**
-     * アプリに必要なパーミッションを尋ねる
-     * @return true if yet granted, false if not granted
-     */
-    private boolean checkPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.SYSTEM_ALERT_WINDOW) != PackageManager.PERMISSION_GRANTED) {
-                Log.i(TAG,"permission ng");
-                return false;
-            }
-        }
-        Log.i(TAG,"permission ok");
-        return true;
     }
 
     @Override
