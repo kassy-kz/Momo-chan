@@ -70,6 +70,7 @@ public class MyNotificationListenerService extends NotificationListenerService i
         registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_POWER_CONNECTED));
         registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_POWER_DISCONNECTED));
         registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_CAMERA_BUTTON));
+        registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_USER_PRESENT));
 
         return START_STICKY;
     }
