@@ -29,6 +29,8 @@ public class MyReceiver extends BroadcastReceiver {
             speechVoice(R.raw.trg_flightmode_on);
         } else if (Intent.ACTION_POWER_CONNECTED.equals(action)) {
             speechVoice(R.raw.trg_battery_start_gohan);
+        } else if (Intent.ACTION_POWER_DISCONNECTED.equals(action)) {
+            speechVoice(R.raw.trg_batterymax_genki);
         } else if (Intent.ACTION_USER_PRESENT.equals(action)) {
             speechVoice(R.raw.trg_sleep_off);
         } else if (Intent.ACTION_CAMERA_BUTTON.equals(action)) {

@@ -355,10 +355,10 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
                 case MotionEvent.ACTION_UP:
                     if (Math.abs(downX - x) < 8 && Math.abs(downY - y) < 8) {
                         Random random = new Random();
-                        int rand = random.nextInt(4);
+                        int rand = random.nextInt(5);
                         switch (rand) {
                             case 0:
-                                speechVoice(R.raw.trg_sleep_off);
+                                speechVoice(R.raw.trg_random_makasete);
                                 break;
                             case 1:
                                 speechVoice(R.raw.trg_random_nodo);
@@ -367,7 +367,10 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
                                 speechVoice(R.raw.trg_random_soba);
                                 break;
                             case 3:
-                                speechVoice(R.raw.trg_sleep_off);
+                                speechVoice(R.raw.trg_random_todayganbaru);
+                                break;
+                            case 4:
+                                speechVoice(R.raw.trg_random_himomose);
                                 break;
                         }
                     }

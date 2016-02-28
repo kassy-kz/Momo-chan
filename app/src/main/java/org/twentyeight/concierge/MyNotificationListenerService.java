@@ -59,7 +59,8 @@ public class MyNotificationListenerService extends NotificationListenerService i
         showNotification();
 
 //        speechText("通知を待ち受けます");
-        speechVoice(R.raw.trg_sleep_off);
+        // 最初のあいさつ
+        speechVoice(R.raw.trg_random_himomose);
 
         mReceiver = new MyReceiver(this);
         registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_SCREEN_ON));
@@ -67,6 +68,7 @@ public class MyNotificationListenerService extends NotificationListenerService i
         registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED));
         registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_HEADSET_PLUG));
         registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_POWER_CONNECTED));
+        registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_POWER_DISCONNECTED));
         registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_CAMERA_BUTTON));
 
         return START_STICKY;
