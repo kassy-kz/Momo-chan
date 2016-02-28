@@ -23,12 +23,14 @@ public class MyReceiver extends BroadcastReceiver {
         Log.i(TAG, "action = " + intent.getAction());
         if (Intent.ACTION_SCREEN_OFF.equals(action)) {
             speechVoice(R.raw.trg_sleep_on);
-        } else if (Intent.ACTION_SCREEN_ON.equals(action)) {
-            speechVoice(R.raw.trg_sleep_off);
+//        } else if (Intent.ACTION_SCREEN_ON.equals(action)) {
+//            speechVoice(R.raw.trg_sleep_off);
         } else if (Intent.ACTION_AIRPLANE_MODE_CHANGED.equals(action)) {
             speechVoice(R.raw.trg_flightmode_on);
         } else if (Intent.ACTION_POWER_CONNECTED.equals(action)) {
             speechVoice(R.raw.trg_battery_start_gohan);
+        } else if (Intent.ACTION_USER_PRESENT.equals(action)) {
+            speechVoice(R.raw.trg_sleep_off);
         }
     }
 
