@@ -37,6 +37,7 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
     Handler mHnadler;
     private int mWalkCounter;
     private static final int WALK_COUNT_MAX = 120;
+    private Timer mWalkStartTimer;
     private Timer mWalkTimer;
     private Timer mAppUsageTimer;
     private TextToSpeech mTts;
@@ -52,6 +53,7 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
     // ↓ これを変えるとキャラがかわります！！
     // 現在実行すべきアニメーションの種類番号
     private String currentType = "1"; // 1〜17にすると変わります！
+    private int currentTypeInt = 1; // 1〜17にすると変わります！
 
     // タイマー（定期実行関係）
     Timer   mTimer   = null;
@@ -162,8 +164,13 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
     public void onStart(Intent intent, int startId) {
         super.onStart(intent, startId);
 
-        startWalkCharacter();
-
+        mWalkStartTimer = new Timer(true);
+        mWalkStartTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                startWalkCharacter();
+            }
+        }, 5000, 5000);
     }
 
     /**
@@ -234,7 +241,6 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
         wm.addView(view, params);
 
         Log.d(TAG, "onStart end");
-        startWalkCharacter();
 
         mAppUsageTimer = new Timer();
         mAppUsageTimer.schedule(new TimerTask() {
@@ -363,7 +369,12 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
                     mWalkCounter++;
                 } else {
                     mWalkTimer.cancel();
-                    currentType = "10";
+                    if(currentTypeInt < 18) {
+                        currentTypeInt++;
+                    } else {
+                        currentTypeInt = 0;
+                    }
+                    currentType = currentTypeInt + "";
                 }
             }
         }, 16, 16);
@@ -413,7 +424,17 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
             mMediaPlayer.stop();
 //            mMediaPlayer.prepare();
         }
+        Log.i(TAG, "speech voice");
         mMediaPlayer = MediaPlayer.create(this, R.raw.sample1);
+        currentTypeInt = 18;
+        currentType = "18";
+        mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                currentTypeInt = 0;
+                currentType = "0";
+            }
+        });
         mMediaPlayer.start();
     }
 }
