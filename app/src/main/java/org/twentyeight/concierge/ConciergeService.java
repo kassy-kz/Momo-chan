@@ -360,7 +360,6 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
         Random random = new Random();
         final double degrees = (double)random.nextInt(360);
         final double radian = Math.toRadians(degrees);
-        Log.i(TAG, "degree:" + degrees);
         mWalkTimer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -372,7 +371,7 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
                     if(currentTypeInt < 18) {
                         currentTypeInt++;
                     } else {
-                        currentTypeInt = 0;
+                        currentTypeInt = 1;
                     }
                     currentType = currentTypeInt + "";
                 }
