@@ -5,6 +5,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -61,6 +62,9 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
 
     // アニメデータ
     AnimationData anime = new AnimationData();
+
+    // 音声再生
+    MediaPlayer mMediaPlayer = null;
 
     /**
      * アニメデータ保持クラス
@@ -332,7 +336,7 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
                     break;
                 case MotionEvent.ACTION_UP:
                     if (Math.abs(downX - x) < 8 && Math.abs(downY - y) < 8) {
-                        speechText("ももちゃんだよ");
+                        speechVoice("");
                     }
                     break;
             }
@@ -397,5 +401,19 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
             // 読み上げ開始
             mTts.speak(str, TextToSpeech.QUEUE_FLUSH, null, null);
         }
+    }
+
+    private void speechVoice(String str) {
+        if (mMediaPlayer == null) {
+            mMediaPlayer = MediaPlayer.create(this, R.raw.sample1);
+            mMediaPlayer.start();
+            return;
+        }
+        if (mMediaPlayer.isPlaying()) {
+            mMediaPlayer.stop();
+//            mMediaPlayer.prepare();
+        }
+        mMediaPlayer = MediaPlayer.create(this, R.raw.sample1);
+        mMediaPlayer.start();
     }
 }
