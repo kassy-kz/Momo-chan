@@ -14,11 +14,13 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-
 import java.util.Locale;
 import java.util.Random;
+import android.widget.ImageView;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Random;
+import java.util.HashMap;
 
 /**
  * Created by YKEI on 2016/02/27.
@@ -27,6 +29,7 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
     WindowManager.LayoutParams prms;
 
     private static final String TAG = "ConciergeService";
+    private final Context context = this;
     private View view;
     private WindowManager wm;
     WindowManager.LayoutParams params;
@@ -39,17 +42,170 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
     private String mBeforeApp = "";
 
 
+    // 現在表示したいID(R.id.hoge)
+    private int currentImageViewId = 0;
+
+    // アニメーションの実行回数
+    private int count = 0;
+
+    // ↓ これを変えるとキャラがかわります！！
+    // 現在実行すべきアニメーションの種類番号
+    private String currentType = "1"; // 1〜17にすると変わります！
+
+    // タイマー（定期実行関係）
+    Timer   mTimer   = null;
+    Handler mHandler = new Handler();
+
+    // アニメデータのサイクル
+    private final int MS = 500;
+
+    // アニメデータ
+    AnimationData anime = new AnimationData();
+
+    /**
+     * アニメデータ保持クラス
+     */
+    public static class AnimationData{
+
+        private HashMap<String,String[][]> animationData = new HashMap<String,String[][]>();
+        private final String[] INIT_D = {"", "", ""};
+        private final String[][] INIT_DATA = {{"", "", ""}};
+
+        AnimationData(){
+
+            // 立っている
+            this.animationData.put("1", new String[][]{{String.valueOf(R.drawable.idle_r1),"700","900"}, {String.valueOf(R.drawable.idle_r2),"700","900"}});
+
+            // 右
+            this.animationData.put("2", new String[][]{{String.valueOf(R.drawable.walkright_r1),"700","900"}, {String.valueOf(R.drawable.walkright_r2),"700","900"}, {String.valueOf(R.drawable.walkright_r3),"700","900"}});
+
+            // 後ろ
+            this.animationData.put("3", new String[][]{{String.valueOf(R.drawable.walkback_r1),"700","900"}, {String.valueOf(R.drawable.walkback_r2),"700","900"}, {String.valueOf(R.drawable.walkback_r3),"700","900"}});
+
+            // 左
+            this.animationData.put("4", new String[][]{{String.valueOf(R.drawable.walkleft_r1),"700","900"}, {String.valueOf(R.drawable.walkleft_r2),"700","900"}, {String.valueOf(R.drawable.walkleft_r3),"700","900"}});
+
+            // 正面
+            this.animationData.put("5", new String[][]{{String.valueOf(R.drawable.walkfront_r1),"700","900"}, {String.valueOf(R.drawable.walkfront_r2),"700","900"}, {String.valueOf(R.drawable.walkfront_r3),"700","900"}});
+
+            // スマイルA(座り)
+            this.animationData.put("6", new String[][]{{String.valueOf(R.drawable.smile_a_r1),"700","700"}, {String.valueOf(R.drawable.smile_a_r2),"700","700"}, {String.valueOf(R.drawable.smile_a_r3),"700","700"}});
+
+            // スマイルB(座り)
+            this.animationData.put("7", new String[][]{{String.valueOf(R.drawable.smile_b_r1),"700","700"}, {String.valueOf(R.drawable.smile_b_r2),"700","700"}});
+
+            // スマイルC(座り)
+            this.animationData.put("8", new String[][]{{String.valueOf(R.drawable.smile_c_r1),"700","700"}, {String.valueOf(R.drawable.smile_c_r2),"700","700"}});
+
+            // スマイルD(座り)
+            this.animationData.put("9", new String[][]{{String.valueOf(R.drawable.smile_d_r1),"700","700"}, {String.valueOf(R.drawable.smile_d_r2),"700","700"},{String.valueOf(R.drawable.smile_d_r3),"700","700"}});
+
+            // びっくり
+            this.animationData.put("10", new String[][]{{String.valueOf(R.drawable.surprise_r1),"700","700"}, {String.valueOf(R.drawable.surprise_r2),"700","700"},{String.valueOf(R.drawable.surprise_r3),"700","700"}});
+
+            // はてな
+            this.animationData.put("11", new String[][]{{String.valueOf(R.drawable.question_r),"700","700"}});
+
+            // 困りA
+            this.animationData.put("12", new String[][]{{String.valueOf(R.drawable.trouble_a_r),"700","700"}});
+
+            // 困りB
+            this.animationData.put("13", new String[][]{{String.valueOf(R.drawable.trouble_b_r1),"700","700"}, {String.valueOf(R.drawable.trouble_b_r2),"700","700"},{String.valueOf(R.drawable.trouble_b_r3),"700","700"}});
+
+            // 困りC
+            this.animationData.put("14", new String[][]{{String.valueOf(R.drawable.trouble_c_r1),"700","700"}, {String.valueOf(R.drawable.trouble_c_r2),"700","700"},{String.valueOf(R.drawable.trouble_c_r3),"700","700"}});
+
+            // 渋い顔
+            this.animationData.put("15", new String[][]{{String.valueOf(R.drawable.bitter_r1),"700","700"}, {String.valueOf(R.drawable.bitter_r2),"700","700"},{String.valueOf(R.drawable.bitter_r3),"700","700"}});
+
+            // 睡眠
+            this.animationData.put("16", new String[][]{{String.valueOf(R.drawable.sleep_r2),"700","700"}, {String.valueOf(R.drawable.sleep_r2),"700","700"}});
+
+            // 目覚め
+            this.animationData.put("17", new String[][]{{String.valueOf(R.drawable.awake_r1),"700","700"}, {String.valueOf(R.drawable.awake_r2),"700","700"}});
+
+        }
+
+        /**
+         *
+         * @param key
+         * @return String[]
+         */
+        public String[][] get(String key){
+            if(this.animationData.get(key) != null) {
+                return this.animationData.get(key);
+            }else{
+                return INIT_DATA;
+            }
+        }
+
+        // 現在有効なanimation(keyで指定)のnumber番目の配列を取得する
+        public String[] getCurrentChild(String key, int number){
+            if(this.animationData.get(key) != null) {
+                return this.animationData.get(key)[number];
+            }else{
+                return INIT_D;
+            }
+        }
+
+    }
+
+
     @Override
     public void onStart(Intent intent, int startId) {
         super.onStart(intent, startId);
-        mHnadler = new Handler();
 
-        Log.d(TAG, "onStart start");
+        startWalkCharacter();
+
+    }
+
+    /**
+     * タイマー
+     * アニメーションをする。
+     * 本メソッドでは、定期実行のみおこなう。
+     * 実処理自体は、別メソッドでおこなっている。
+     */
+    public void setTimer(){
+        mTimer = new Timer(true);
+        mTimer.schedule( new TimerTask(){
+            @Override
+            public void run() {
+                mHandler.post( new Runnable() {
+                    public void run() {
+                        // 設定されている種類に応じた画面遷移(アニメーション(=画像差し替え))
+                        update();
+                    }
+                });
+            }
+        }, 1000, MS);
+    }
+
+    private void update(){
+
+        // 表示すべき項目の表示
+        ImageView currentImage = (ImageView) view.findViewById(currentImageViewId);
+
+        // コマ数別
+        if(anime.get(currentType).length == 2){
+            currentImage.setImageResource(Integer.parseInt(
+                    anime.getCurrentChild(currentType, count % 2)[0]));
+        }else if(anime.get(currentType).length == 3){
+            currentImage.setImageResource(Integer.parseInt(
+                    anime.getCurrentChild(currentType, count % 3)[0]));
+        }
+
+        count++;
+
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        mHnadler = new Handler();
 
         // Viewからインフレータを作成する
         LayoutInflater layoutInflater = LayoutInflater.from(this);
-
-        Log.d(TAG, "onStart start 001");
 
         // 重ね合わせするViewの設定を行う
         params = new WindowManager.LayoutParams(
@@ -87,13 +243,13 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
                 }
             }
         }, 100, 100);
-    }
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
         // TextToSpeechオブジェクトの生成
         mTts = new TextToSpeech(this, this);
+
+        // 定期実行のタイマー設定
+        this.currentImageViewId = R.id.characterImageView;
+        setTimer();
 
     }
 
