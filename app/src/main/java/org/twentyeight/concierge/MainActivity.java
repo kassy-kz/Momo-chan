@@ -9,14 +9,10 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.Button;
 
 /**
@@ -59,72 +55,68 @@ public class MainActivity extends AppCompatActivity {
                 stopService(new Intent(MainActivity.this, MyNotificationListenerService.class));
             }
         });
-
-        // 一番最初にパーミッションたずねてしまおう
-        // M以上かつまだパーミッションを得ていない
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(getApplicationContext())) {
-            Log.i(TAG, "not granted yet");
-//            // ダイアログを出してパーミッション許可を取りに行く
-            checkDrawOverlayPermission();
-        }
-        // M未満だがパーミッションはまだ
-        else if (checkNotificationSetting()) {
-            Log.i(TAG, "partially granted");
-            // 6. Notificationの許可貰いに行く。
-            startActivityForResult(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"), REQUEST_CODE_NOTI);
-        }
-        // 既に全パーミッション問題ない
-        else {
-            Log.i(TAG, "already granted");
-            // ConciergeService 起動
-            if (isUsageStatsAllowed()) {
-//                Log.d(TAG, "サービス起動");
-//                startService(new Intent(MainActivity.this, ConciergeService.class));
-//                Intent serviceIntent = new Intent(this, MyNotificationListenerService.class);
-//                startService(serviceIntent);
-            } else {
-                checkAppUsagePermission();
-            }
-        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        getAllPermissioins();
     }
 
     /**
-     * Notificationの許可有無を確認
-     * @return
+     * 全パーミッションを尋ねる処理
+     * 繰り返し呼んで問題ない
      */
-    private boolean checkNotificationSetting() {
+    private void getAllPermissioins() {
+        if (!isOverlayAllowed()) {
+            getOverlayPermission();
+            return;
+        }
 
-        ContentResolver contentResolver = getContentResolver();
-        String enabledNotificationListeners = Settings.Secure.getString(contentResolver, "enabled_notification_listeners");
-        String packageName = getPackageName();
+        if (!isUsageStatsAllowed()) {
+            getUsagePermission();
+            return;
+        }
 
-        return !(enabledNotificationListeners == null || !enabledNotificationListeners.contains(packageName));
-    }
-
-    /**
-     * 1. オーバーレイの許可を取りに行く
-     */
-    @TargetApi(Build.VERSION_CODES.M)
-    public void checkDrawOverlayPermission() {
-        if (!Settings.canDrawOverlays(this)) {
-            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:" + getPackageName()));
-            startActivityForResult(intent, REQUEST_CODE_OVERLAY);
+        if (!isNotificationAllowed()) {
+            getNotificationPermission();
+            return;
         }
     }
 
     /**
-     * アプリUsageの許可を取りに行く
+     * オーバーレイの許可を取りに行く
      */
-    @TargetApi(Build.VERSION_CODES.M)
-    public void checkAppUsagePermission() {
+    private void getOverlayPermission() {
+        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:" + getPackageName()));
+        startActivityForResult(intent, REQUEST_CODE_OVERLAY);
+    }
+
+    /**
+     * Usageの許可を取りに行く
+     */
+    private void getUsagePermission() {
         // 4. usageの許可取りに行く
         startActivityForResult(new Intent("android.settings.USAGE_ACCESS_SETTINGS"), REQUEST_CODE_USAGE);
+    }
+
+    /**
+     * Notificationの許可を取りに行く
+     */
+    private void getNotificationPermission() {
+        startActivityForResult(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"), REQUEST_CODE_NOTI);
+    }
+
+    /**
+     * 自分アプリがOverlay許可をもらってるかどうか
+     */
+    private boolean isOverlayAllowed() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return Settings.canDrawOverlays(this);
+        } else {
+            return true;
+        }
     }
 
     /**
@@ -132,41 +124,32 @@ public class MainActivity extends AppCompatActivity {
      * @return
      */
     private boolean isUsageStatsAllowed() {
-        AppOpsManager appOps = (AppOpsManager) getSystemService(Context.APP_OPS_SERVICE);
-        int uid = android.os.Process.myUid();
-        int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, uid, getPackageName());
-        return  mode == AppOpsManager.MODE_ALLOWED;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            AppOpsManager appOps = (AppOpsManager) getSystemService(Context.APP_OPS_SERVICE);
+            int uid = android.os.Process.myUid();
+            int mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, uid, getPackageName());
+            return mode == AppOpsManager.MODE_ALLOWED;
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * Notificationの許可をもらってるかどうか
+     */
+    private boolean isNotificationAllowed() {
+        ContentResolver contentResolver = getContentResolver();
+        String enabledNotificationListeners = Settings.Secure.getString(contentResolver, "enabled_notification_listeners");
+        String packageName = getPackageName();
+        return !(enabledNotificationListeners == null || !enabledNotificationListeners.contains(packageName));
     }
 
     /**
      * パーミッション尋ねた結果
-     * @param requestCode
-     * @param resultCode
-     * @param data
+     * パーミッションを全部もらうまで繰り返し尋ねる感じ
      */
-    @TargetApi(Build.VERSION_CODES.M)
     @Override
     protected void onActivityResult(int requestCode, int resultCode,  Intent data) {
-        // 2. Overlayの許可をもらった
-        if (requestCode == REQUEST_CODE_OVERLAY) {
-            Log.i(TAG, "response overlay");
-            if (Settings.canDrawOverlays(this)) {
-                // 3. usageの許可貰いに行く
-                checkAppUsagePermission();
-            }
-        }
-        // 5. usageの許可もらった
-        else if (requestCode == REQUEST_CODE_USAGE) {
-            Log.i(TAG, "response usage");
-            // 6. Notificationの許可貰いに行く。
-            startActivityForResult(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"), REQUEST_CODE_NOTI);
-        }
-        // 7. notiの許可もらった
-        else if (requestCode == REQUEST_CODE_NOTI) {
-//            Log.d(TAG,"サービス起動");
-//            startService(new Intent(MainActivity.this, ConciergeService.class));
-//            Intent serviceIntent = new Intent(this, MyNotificationListenerService.class);
-//            startService(serviceIntent);
-        }
+        getAllPermissioins();
     }
 }
