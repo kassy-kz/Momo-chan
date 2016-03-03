@@ -37,6 +37,15 @@
         </service>
         <service android:name=".ConciergeService">
         </service>
+
+        <receiver
+            android:name=".ServiceStopReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="orz.kassy.momo.stop"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

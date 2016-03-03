@@ -53,9 +53,8 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // これは効かない
 //                stopService(new Intent(MainActivity.this, MyNotificationListenerService.class));
+                // サービスを停止する
                 stopService(new Intent(MainActivity.this, ConciergeService.class));
-
-                // これやるとプロセスが終了するので実質アプリ処理のラストとなる
                 MyNotificationListenerService.stopNotificationService();
             }
         });

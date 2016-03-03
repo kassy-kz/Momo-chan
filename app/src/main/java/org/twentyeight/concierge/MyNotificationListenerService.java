@@ -47,7 +47,7 @@ public class MyNotificationListenerService extends NotificationListenerService {
      * 特殊な殺し方をしないといけない
      */
     public static void stopNotificationService() {
-        Log.i(TAG, "kill my process");
+        Log.i(TAG, "virtual stop notification service");
         sSelf.deleteRunningNotification();
         sSelf.unregisterReceiver(sSelf.mReceiver);
         sSelf.mIsRunning = false;
@@ -188,6 +188,10 @@ public class MyNotificationListenerService extends NotificationListenerService {
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         notificationBuilder.setContentIntent(contentIntent);
 
+        // DELボタンを追加する
+        Intent stopIntent = new Intent("orz.kassy.momo.stop");
+        PendingIntent pIntent = PendingIntent.getBroadcast(this, 10, stopIntent, PendingIntent.FLAG_ONE_SHOT);
+        notificationBuilder.addAction(android.R.drawable.ic_input_delete, "終了", pIntent);
 
         // 横フリックで消されないようにしたい
         Notification noti = notificationBuilder.build();
