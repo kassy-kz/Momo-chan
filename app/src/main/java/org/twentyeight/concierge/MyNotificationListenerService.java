@@ -2,6 +2,7 @@ package org.twentyeight.concierge;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -21,7 +22,6 @@ public class MyNotificationListenerService extends NotificationListenerService {
     
     private static final String TAG = "Notification";
     private NotificationManager mNotificationManager;
-    private NotificationCompat.Builder mNotificationBuilder;
     private static final int NOTIFICATION_ID = 0;
     private MyReceiver mReceiver;
 
@@ -169,18 +169,28 @@ public class MyNotificationListenerService extends NotificationListenerService {
      */
     private void showRunningNotification() {
         Log.i(TAG, "show notification");
+
+        // ビルダーを立てる
+        NotificationCompat.Builder notificationBuilder;
+
         // ビルダーを経由してノーティフィケーションを作成
-        mNotificationBuilder = new NotificationCompat.Builder(getApplicationContext());
-        mNotificationBuilder.setSmallIcon(R.drawable.ic_get_app);
+        notificationBuilder = new NotificationCompat.Builder(getApplicationContext());
+        notificationBuilder.setSmallIcon(R.drawable.ic_get_app);
 
         // 大きなアイコンを設定
-        mNotificationBuilder.setContentTitle("通知マネージャー起動中");
+        notificationBuilder.setContentTitle("通知マネージャー起動中");
         Bitmap largeIcon = BitmapFactory.decodeResource(
                 getResources(), R.mipmap.ic_launcher);
-        mNotificationBuilder.setLargeIcon(largeIcon);
+        notificationBuilder.setLargeIcon(largeIcon);
+
+        // 通知を押したらアプリが起動するようにしたい
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        notificationBuilder.setContentIntent(contentIntent);
+
 
         // 横フリックで消されないようにしたい
-        Notification noti = mNotificationBuilder.build();
+        Notification noti = notificationBuilder.build();
         noti.flags |= Notification.FLAG_NO_CLEAR;
 
         // マネージャをつかって通知する
