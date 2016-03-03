@@ -37,22 +37,6 @@
         </service>
         <service android:name=".ConciergeService">
         </service>
-
-        <!--<receiver-->
-            <!--android:name=".MyReceiver"-->
-            <!--android:enabled="true"-->
-            <!--android:exported="true">-->
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.BATTERY_LOW"/>-->
-            <!--</intent-filter>-->
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.AIRPLANE_MODE"/>-->
-            <!--</intent-filter>-->
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>-->
-            <!--</intent-filter>-->
-
-        <!--</receiver>-->
     </application>
 
 </manifest>

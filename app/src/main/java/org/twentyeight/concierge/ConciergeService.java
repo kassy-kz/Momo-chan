@@ -24,9 +24,9 @@ import java.util.Random;
 import java.util.HashMap;
 
 /**
- * Created by YKEI on 2016/02/27.
+ * ももちゃんのOverlay表示と Usage変化による応答（アプリ起動をチェック）するサービス
  */
-public class ConciergeService extends Service implements TextToSpeech.OnInitListener {
+public class ConciergeService extends Service {
     WindowManager.LayoutParams prms;
 
     private static final String TAG = "ConciergeService";
@@ -40,7 +40,6 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
     private Timer mWalkStartTimer;
     private Timer mWalkTimer;
     private Timer mAppUsageTimer;
-    private TextToSpeech mTts;
     private String mBeforeApp = "";
 
 
@@ -161,8 +160,8 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
 
 
     @Override
-    public void onStart(Intent intent, int startId) {
-        super.onStart(intent, startId);
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
 
         mWalkStartTimer = new Timer(true);
         mWalkStartTimer.schedule(new TimerTask() {
@@ -171,6 +170,7 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
                 startWalkCharacter();
             }
         }, 10000, 10000);
+        return START_STICKY;
     }
 
     /**
@@ -282,7 +282,7 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
         }, 100, 100);
 
         // TextToSpeechオブジェクトの生成
-        mTts = new TextToSpeech(this, this);
+//        mTts = new TextToSpeech(this, this);
 
         // 定期実行のタイマー設定
         this.currentImageViewId = R.id.characterImageView;
@@ -293,6 +293,7 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Log.i(TAG, "onDestroy *********************************");
 
         // サービスが破棄されるときには重ね合わせしていたViewを削除する
         wm.removeView(view);
@@ -314,21 +315,6 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
         // TODO Auto-generated method stub
         return null;
     }
-
-    @Override
-    public void onInit(int status) {
-        if (TextToSpeech.SUCCESS == status) {
-            Locale locale = Locale.JAPANESE;
-            if (mTts.isLanguageAvailable(locale) >= TextToSpeech.LANG_AVAILABLE) {
-                mTts.setLanguage(locale);
-            } else {
-                Log.d("", "Error SetLocale");
-            }
-        } else {
-            Log.d("", "Error Init");
-        }
-    }
-
 
     private class DragViewListener implements View.OnTouchListener {
         // ドラッグ対象のView
@@ -453,31 +439,19 @@ public class ConciergeService extends Service implements TextToSpeech.OnInitList
         mHnadler.post(new Runnable() {
             @Override
             public void run() {
-//                Log.i(TAG, "rad : " + radian);
-//                Log.i(TAG, "x,y : " + params.x + "," + params.y);
-                int deltaX = (int) (2 * Math.cos(radian));
-                int deltaY = (int) (2 * Math.sin(radian));
-                params.x += deltaX;
-                params.y += deltaY;
-                wm.updateViewLayout(view, params);
+                try {
+                    int deltaX = (int) (2 * Math.cos(radian));
+                    int deltaY = (int) (2 * Math.sin(radian));
+                    params.x += deltaX;
+                    params.y += deltaY;
+                    wm.updateViewLayout(view, params);
+                }
+                // タイミングによっては例外はくこともあるのでキャッチしておく
+                catch (IllegalArgumentException e) {
+                    Log.i(TAG, "IllegalArgumentException");
+                }
             }
         });
-    }
-
-    /**
-     * TextToSpeechで喋らせる
-     */
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void speechText(String str) {
-        if (0 < str.length()) {
-            if (mTts.isSpeaking()) {
-                // 読み上げ中なら止める
-                mTts.stop();
-            }
-
-            // 読み上げ開始
-            mTts.speak(str, TextToSpeech.QUEUE_FLUSH, null, null);
-        }
     }
 
     private void speechVoice(String str) {

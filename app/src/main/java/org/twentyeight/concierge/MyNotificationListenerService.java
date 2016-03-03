@@ -1,6 +1,5 @@
 package org.twentyeight.concierge;
 
-import android.annotation.TargetApi;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
@@ -8,26 +7,29 @@ import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
-import android.os.Build;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
-import android.speech.tts.TextToSpeech;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
-import java.util.Locale;
-
-public class MyNotificationListenerService extends NotificationListenerService implements TextToSpeech.OnInitListener {
+/**
+ * 通知を受け取るのと、BroadcastReceiverの管理を行うサービス
+ * 最初のあいさつもここでしゃべる
+ */
+public class MyNotificationListenerService extends NotificationListenerService {
     
-    private String TAG = "Notification";
+    private static final String TAG = "Notification";
     private NotificationManager mNotificationManager;
     private NotificationCompat.Builder mNotificationBuilder;
     private static final int NOTIFICATION_ID = 0;
-    private TextToSpeech mTts;
     private MyReceiver mReceiver;
 
     // 音声再生
     MediaPlayer mMediaPlayer = null;
+    private static MyNotificationListenerService sSelf;
+
+    // このサービスは停止できないので、稼働中フラグを持つ
+    private boolean mIsRunning = false;
 
     /**
      * onCreate
@@ -36,10 +38,20 @@ public class MyNotificationListenerService extends NotificationListenerService i
     public void onCreate() {
         Log.i(TAG, "onCreate");
         super.onCreate();
-
-        // TextToSpeechオブジェクトの生成
-        mTts = new TextToSpeech(this, this);
+        sSelf = this;
     }
+
+    /**
+     * NotificationListenerServiceはSystemにbindされるため、
+     * 特殊な殺し方をしないといけない
+     */
+    public static void stopNotificationService() {
+        Log.i(TAG, "kill my process");
+        sSelf.deleteRunningNotification();
+        sSelf.unregisterReceiver(sSelf.mReceiver);
+        sSelf.mIsRunning = false;
+    }
+
 
     /**
      * onStartCommand
@@ -52,11 +64,13 @@ public class MyNotificationListenerService extends NotificationListenerService i
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent,flags,startId);
 
+        mIsRunning = true;
+
         // 通知マネージャー
         mNotificationManager = (NotificationManager) getSystemService(Service.NOTIFICATION_SERVICE);
 
-        Log.i(TAG, "mynotificationlistener start");
-        showNotification();
+        Log.i(TAG, "mynotificationlistener start : " + startId);
+        showRunningNotification();
 
 //        speechText("通知を待ち受けます");
         // 最初のあいさつ
@@ -72,15 +86,16 @@ public class MyNotificationListenerService extends NotificationListenerService i
         registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_CAMERA_BUTTON));
         registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_USER_PRESENT));
 
-        return START_STICKY;
+        return START_NOT_STICKY;
     }
 
+    /**
+     * これは絶対に呼ばれないので注意
+     */
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.i(TAG, "mynotificationlistener stop");
-        deleteNotification();
-        unregisterReceiver(mReceiver);
+        Log.i(TAG, "mynotificationlistener stop ====================================");
     }
 
     /**
@@ -121,8 +136,8 @@ public class MyNotificationListenerService extends NotificationListenerService i
         Log.i(TAG,"id:" + id + " time:" +time + " isClearable:" + clearable + " isOngoing:" + ongoing);
         Log.i(TAG,"packageName : " + packageName);
         Log.i(TAG,"tickerText  : " + text);
-        Log.i(TAG,"tag         : " + tag);
-        Log.i(TAG,"tostring:" + sbn.toString());
+        Log.i(TAG, "tag         : " + tag);
+        Log.i(TAG, "tostring:" + sbn.toString());
 
 
         // 受信した結果をBLEに投げてみる
@@ -151,7 +166,7 @@ public class MyNotificationListenerService extends NotificationListenerService i
     /**
      * 通知バーにアイコンを出す
      */
-    private void showNotification() {
+    private void showRunningNotification() {
         Log.i(TAG, "show notification");
         // ビルダーを経由してノーティフィケーションを作成
         mNotificationBuilder = new NotificationCompat.Builder(getApplicationContext());
@@ -170,48 +185,22 @@ public class MyNotificationListenerService extends NotificationListenerService i
     /**
      * 通知バーのアイコンを消す
      */
-    private void deleteNotification() {
+    private void deleteRunningNotification() {
         NotificationManager manager = (NotificationManager)
                 getSystemService(Service.NOTIFICATION_SERVICE);
         manager.cancel(NOTIFICATION_ID);
     }
 
     /**
-     * TextToSpeechのInitが完了した
-     * @param status
+     * 音声をしゃべる
+     * @param resId
      */
-    @Override
-    public void onInit(int status) {
-        if (TextToSpeech.SUCCESS == status) {
-            Locale locale = Locale.JAPANESE;
-            if (mTts.isLanguageAvailable(locale) >= TextToSpeech.LANG_AVAILABLE) {
-                mTts.setLanguage(locale);
-            } else {
-                Log.d("", "Error SetLocale");
-            }
-        } else {
-            Log.d("", "Error Init");
-        }
-    }
-
-    /**
-     * TextToSpeechで喋らせる
-     */
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void speechText(String str) {
-        if (0 < str.length()) {
-            if (mTts.isSpeaking()) {
-                // 読み上げ中なら止める
-                mTts.stop();
-            }
-
-            // 読み上げ開始
-            mTts.speak(str, TextToSpeech.QUEUE_FLUSH, null, null);
-        }
-    }
-
-
     private void speechVoice(int resId) {
+        // 稼働中でないならしゃべらない
+        if (!mIsRunning) {
+            return;
+        }
+
         if (mMediaPlayer == null) {
             mMediaPlayer = MediaPlayer.create(this, resId);
             mMediaPlayer.start();

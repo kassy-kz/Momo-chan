@@ -51,8 +51,12 @@ public class MainActivity extends AppCompatActivity {
         btnStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // これは効かない
+//                stopService(new Intent(MainActivity.this, MyNotificationListenerService.class));
                 stopService(new Intent(MainActivity.this, ConciergeService.class));
-                stopService(new Intent(MainActivity.this, MyNotificationListenerService.class));
+
+                // これやるとプロセスが終了するので実質アプリ処理のラストとなる
+                MyNotificationListenerService.stopNotificationService();
             }
         });
     }
