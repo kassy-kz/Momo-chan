@@ -1,5 +1,6 @@
 package org.twentyeight.concierge;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
@@ -178,8 +179,12 @@ public class MyNotificationListenerService extends NotificationListenerService {
                 getResources(), R.mipmap.ic_launcher);
         mNotificationBuilder.setLargeIcon(largeIcon);
 
+        // 横フリックで消されないようにしたい
+        Notification noti = mNotificationBuilder.build();
+        noti.flags |= Notification.FLAG_NO_CLEAR;
+
         // マネージャをつかって通知する
-        mNotificationManager.notify(NOTIFICATION_ID, mNotificationBuilder.build());
+        mNotificationManager.notify(NOTIFICATION_ID, noti);
     }
 
     /**
