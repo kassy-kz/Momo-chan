@@ -23,8 +23,6 @@ import java.util.HashMap;
  * ももちゃんのOverlay表示と Usage変化による応答（アプリ起動をチェック）するサービス
  */
 public class ConciergeService extends Service {
-    private static final long CYCLE_ANIME = 500;
-    private static final int WALK_COUNT_MAX = 180; // 2秒
 
     private static final String TAG = "ConciergeService";
 
@@ -49,39 +47,46 @@ public class ConciergeService extends Service {
     private static final Integer MOMO_CRY = 15;
     private static final Integer MOMO_TALK = 16;
 
-    private View view;
-    private WindowManager wm;
-    private WindowManager.LayoutParams params;
-    private Handler mHnadler;
-    private int mWalkCounter;
+    /**
+     * ももちゃんのアニメに関する定数
+      */
+    // 基本のアニメ間隔
+    private static final long PERIOD_ANIME = 500;
+    // 歩き始める間隔
+    private static final int PERIOD_WALK_START = 10000;
+    // 歩き始めてから歩き終わるまで
+    private static final int WALK_COUNT_MAX = 180; // 60fps x 3秒
+
+
+    private View mOverlayView;
+    private WindowManager mWindowManager;
+    private WindowManager.LayoutParams mParams;
+    private Handler mHandler;
+    private String mBeforeApp = "";
+
+    // タイマー（定期実行関係）
+    private Timer mImageChangeTimer;
     private Timer mWalkStartTimer;
     private Timer mWalkTimer;
     private Timer mAppUsageTimer;
-    private String mBeforeApp = "";
-    private Timer mImageChangeTimer;
-
-    private int currentTypeInt = 1; // 1〜17にすると変わります！
-
-    // タイマー（定期実行関係）
-    Timer   mTimer   = null;
-    Handler mHandler = new Handler();
-
-    // アニメデータのサイクル
-    private final int MS = 500;
 
     // 音声再生
     MediaPlayer mMediaPlayer = null;
 
     // ももちゃんのImageView
     ImageView mMainImageView;
+
+    // アニメに関する変数とフラグ
+    private int mWalkCounter;
     private int mAnimeType = 0;
     private int mAnimeCount = 0;
+    private boolean mDraggedFlag = false;
 
-    private HashMap<Integer, int[]> mAnimeImageMap = new HashMap<>();
 
     /**
      * アニメーションのパターンの定義
      */
+    private HashMap<Integer, int[]> mAnimeImageMap = new HashMap<>();
     private void setImageMap() {
         // 素立ち
         mAnimeImageMap.put(MOMO_STAND, new int[]{R.drawable.idle_r1, R.drawable.idle_r2});
@@ -137,7 +142,7 @@ public class ConciergeService extends Service {
             public void run() {
                 startWalkCharacter();
             }
-        }, 10000, 10000);
+        }, PERIOD_WALK_START, PERIOD_WALK_START);
         return START_STICKY;
     }
 
@@ -145,13 +150,13 @@ public class ConciergeService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        mHnadler = new Handler();
+        mHandler = new Handler();
 
         // Viewからインフレータを作成する
         LayoutInflater layoutInflater = LayoutInflater.from(this);
 
         // 重ね合わせするViewの設定を行う
-        params = new WindowManager.LayoutParams(
+        mParams = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
@@ -159,15 +164,14 @@ public class ConciergeService extends Service {
                 PixelFormat.TRANSLUCENT);
 
         // WindowManagerを取得する
-        wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+        mWindowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
 
         // レイアウトファイルから重ね合わせするViewを作成する
-        view = layoutInflater.inflate(R.layout.overlay, null);
-
-        view.setOnTouchListener(new DragViewListener(view));
+        mOverlayView = layoutInflater.inflate(R.layout.overlay, null);
+        mOverlayView.setOnTouchListener(new DragViewListener(mOverlayView));
 
         // Viewを画面上に重ね合わせする
-        wm.addView(view, params);
+        mWindowManager.addView(mOverlayView, mParams);
 
         Log.d(TAG, "onStart end");
 
@@ -212,7 +216,7 @@ public class ConciergeService extends Service {
 
         // 定期実行のタイマー設定
         setImageMap();
-        mMainImageView = (ImageView) view.findViewById(R.id.characterImageView);
+        mMainImageView = (ImageView) mOverlayView.findViewById(R.id.characterImageView);
         setImageChangeTimer();
     }
 
@@ -224,7 +228,7 @@ public class ConciergeService extends Service {
         Log.i(TAG, "onDestroy *********************************");
 
         // サービスが破棄されるときには重ね合わせしていたViewを削除する
-        wm.removeView(view);
+        mWindowManager.removeView(mOverlayView);
 
         // タイマー全部破棄
         if (mWalkStartTimer != null) {
@@ -265,7 +269,7 @@ public class ConciergeService extends Service {
                     }
                 });
             }
-        }, 0, CYCLE_ANIME);
+        }, 0, PERIOD_ANIME);
     }
 
     /**
@@ -321,21 +325,22 @@ public class ConciergeService extends Service {
                     downY = y;
                     dragStartX = x;
                     dragStartY = y;
-//                    Log.i(TAG, "first params " + params.x + ","+params.y);
+//                    Log.i(TAG, "first mParams " + mParams.x + ","+mParams.y);
                     break;
 
                 // ドラッグしたとき
                 case MotionEvent.ACTION_MOVE:
                     changeAnimeType(MOMO_SURPRISE);
+                    mDraggedFlag = true;
                     // 今回イベントでのView移動先の位置
                     int deltaX = x - dragStartX;
                     int deltaY = y - dragStartY;
-                    params.x += deltaX;
-                    params.y += deltaY;
-                    wm.updateViewLayout(view, params);
+                    mParams.x += deltaX;
+                    mParams.y += deltaY;
+                    mWindowManager.updateViewLayout(view, mParams);
                     dragStartX = x;
                     dragStartY = y;
-//                    Log.i(TAG, "update params " + params.x + ","+params.y);
+//                    Log.i(TAG, "update mParams " + mParams.x + ","+mParams.y);
                     break;
 
                 // 離した時
@@ -378,6 +383,10 @@ public class ConciergeService extends Service {
      * キャラを歩かせる
      */
     private void startWalkCharacter() {
+        if (mDraggedFlag) {
+            mDraggedFlag = false;
+            return;
+        }
         mWalkCounter = 0;
         mWalkTimer = new Timer();
         Random random = new Random();
@@ -412,17 +421,23 @@ public class ConciergeService extends Service {
 
     /**
      * キャラを歩かせる
+     * @param radian 歩かせる方向のみ指定（ラジアン）
      */
     private void walkCharacterOneStep(final double radian) {
-        mHnadler.post(new Runnable() {
+        // ドラッグ中ならあるかない
+        if (mDraggedFlag) {
+            return;
+        }
+
+        mHandler.post(new Runnable() {
             @Override
             public void run() {
                 try {
                     int deltaX = (int) (2 * Math.cos(radian));
                     int deltaY = (int) (2 * Math.sin(radian));
-                    params.x += deltaX;
-                    params.y += deltaY;
-                    wm.updateViewLayout(view, params);
+                    mParams.x += deltaX;
+                    mParams.y += deltaY;
+                    mWindowManager.updateViewLayout(mOverlayView, mParams);
                 }
                 // タイミングによっては例外はくこともあるのでキャッチしておく
                 catch (IllegalArgumentException e) {
