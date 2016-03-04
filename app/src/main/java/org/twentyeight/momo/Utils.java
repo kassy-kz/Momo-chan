@@ -4,24 +4,26 @@ import android.app.ActivityManager;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
+import android.media.MediaPlayer;
 import android.os.Build;
-
 import java.util.List;
 
 /**
  * Created by kashimoto on 2016/02/28.
  */
 public class Utils {
+
+    private static MediaPlayer sMediaPlayer;
+
     /**
      * トップに起動しているActivityのpackage nameを指定する
-     *
      * @param context
      * @return
      */
     public static String getTopApplicationPackage(Context context) {
 
         if (Build.VERSION.SDK_INT >= 22) {
-            UsageStatsManager usm = (UsageStatsManager) context.getSystemService("usagestats");
+            UsageStatsManager usm = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
             long time = System.currentTimeMillis();
             UsageEvents events = usm.queryEvents(time - (1000 * 60 * 60), time);
             if (events != null && events.hasNextEvent()) {
@@ -55,5 +57,17 @@ public class Utils {
         }
 
         return context.getPackageName();
+    }
+
+    /**
+     * ももちゃんにしゃべらせる
+     */
+    public static void speechVoice(Context context, int resId, MediaPlayer.OnCompletionListener listener) {
+        if (sMediaPlayer != null && sMediaPlayer.isPlaying()) {
+            sMediaPlayer.stop();
+        }
+        sMediaPlayer = MediaPlayer.create(context, resId);
+        sMediaPlayer.setOnCompletionListener(listener);
+        sMediaPlayer.start();
     }
 }

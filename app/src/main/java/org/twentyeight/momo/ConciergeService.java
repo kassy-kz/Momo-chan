@@ -70,9 +70,6 @@ public class ConciergeService extends Service {
     private Timer mWalkTimer;
     private Timer mAppUsageTimer;
 
-    // 音声再生
-    MediaPlayer mMediaPlayer = null;
-
     // ももちゃんのImageView
     ImageView mMainImageView;
 
@@ -81,7 +78,8 @@ public class ConciergeService extends Service {
     private int mAnimeType = 0;
     private int mAnimeCount = 0;
     private boolean mDraggedFlag = false;
-
+    private boolean mTalkingFlag = false;
+    private static Context sContext;
 
     /**
      * アニメーションのパターンの定義
@@ -151,6 +149,7 @@ public class ConciergeService extends Service {
         super.onCreate();
 
         mHandler = new Handler();
+        sContext = this;
 
         // Viewからインフレータを作成する
         LayoutInflater layoutInflater = LayoutInflater.from(this);
@@ -184,31 +183,31 @@ public class ConciergeService extends Service {
                     Log.i(TAG, "app : " +  app);
                     mBeforeApp = app;
                     if ("com.google.android.dialer".equals(app)) {
-                        speechVoice(R.raw.trg_phoneappstart);
+                        speechMomo(R.raw.trg_phoneappstart);
                     } else if ("com.google.android.gm".equals(app)) {
-                        speechVoice(R.raw.trg_mail_app_start);
+                        speechMomo(R.raw.trg_mail_app_start);
                     } else if ("com.amazon.kindle".equals(app)) {
-                        speechVoice(R.raw.trg_kindle);
+                        speechMomo(R.raw.trg_kindle);
                     } else if ("com.google.android.music".equals(app)) {
-                        speechVoice(R.raw.trg_musicappstart);
+                        speechMomo(R.raw.trg_musicappstart);
                     } else if ("com.google.android.GoogleCamera".equals(app)) {
-                        speechVoice(R.raw.trg_camera_on);
+                        speechMomo(R.raw.trg_camera_on);
                     } else if ("com.android.chrome".equals(app)) {
-                        speechVoice(R.raw.trg_browser);
+                        speechMomo(R.raw.trg_browser);
                     } else if ("jp.naver.line.android".equals(app)) {
-                        speechVoice(R.raw.trg_line_app_start);
+                        speechMomo(R.raw.trg_line_app_start);
                     } else if ("com.android.providers.downloads".equals(app)) {
-                        speechVoice(R.raw.trg_searchappli);
+                        speechMomo(R.raw.trg_searchappli);
                     } else if ("jp.co.rakuten.kobo".equals(app)) {
-                        speechVoice(R.raw.trg_kobo);
+                        speechMomo(R.raw.trg_kobo);
                     } else if ("jp.co.rakuten.appmarket".equals(app)) {
-                        speechVoice(R.raw.trg_rakuten);
+                        speechMomo(R.raw.trg_rakuten);
                     } else if ("com.google.android.apps.maps".equals(app)) {
-                        speechVoice(R.raw.trg_map_dokoikuno);
+                        speechMomo(R.raw.trg_map_dokoikuno);
                     } else if ("jp.co.yahoo.android.apps.transit".equals(app)) {
-                        speechVoice(R.raw.trg_norikae_next);
+                        speechMomo(R.raw.trg_norikae_next);
                     } else if ("jp.co.jorudan.nrkj".equals(app)) {
-                        speechVoice(R.raw.trg_norikae_next);
+                        speechMomo(R.raw.trg_norikae_next);
                     }
                 }
             }
@@ -220,8 +219,9 @@ public class ConciergeService extends Service {
         setImageChangeTimer();
     }
 
-
-
+    /**
+     * onDestroy
+     */
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -319,8 +319,6 @@ public class ConciergeService extends Service {
             switch (event.getAction()) {
                 // おした時
                 case MotionEvent.ACTION_DOWN:
-                    changeAnimeType(0);
-
                     downX = x;
                     downY = y;
                     dragStartX = x;
@@ -345,26 +343,25 @@ public class ConciergeService extends Service {
 
                 // 離した時
                 case MotionEvent.ACTION_UP:
-                    // ドラッグをしていない時
-                    changeAnimeType(1);
+                    // ドラッグをしていない時 => なんか喋らせる
                     if (Math.abs(downX - x) < 8 && Math.abs(downY - y) < 8) {
                         Random random = new Random();
                         int rand = random.nextInt(5);
                         switch (rand) {
                             case 0:
-                                speechVoice(R.raw.trg_random_makasete);
+                                speechMomo(R.raw.trg_random_makasete);
                                 break;
                             case 1:
-                                speechVoice(R.raw.trg_random_nodo);
+                                speechMomo(R.raw.trg_random_nodo);
                                 break;
                             case 2:
-                                speechVoice(R.raw.trg_random_soba);
+                                speechMomo(R.raw.trg_random_soba);
                                 break;
                             case 3:
-                                speechVoice(R.raw.trg_random_todayganbaru);
+                                speechMomo(R.raw.trg_random_todayganbaru);
                                 break;
                             case 4:
-                                speechVoice(R.raw.trg_random_himomose);
+                                speechMomo(R.raw.trg_random_himomose);
                                 break;
                         }
                     }
@@ -383,6 +380,10 @@ public class ConciergeService extends Service {
      * キャラを歩かせる
      */
     private void startWalkCharacter() {
+        // ドラッグ中 or 喋り中なら歩かない
+        if (mTalkingFlag) {
+            return;
+        }
         if (mDraggedFlag) {
             mDraggedFlag = false;
             return;
@@ -424,8 +425,8 @@ public class ConciergeService extends Service {
      * @param radian 歩かせる方向のみ指定（ラジアン）
      */
     private void walkCharacterOneStep(final double radian) {
-        // ドラッグ中ならあるかない
-        if (mDraggedFlag) {
+        // ドラッグ中もしくはしゃべり中ならあるかない
+        if (mDraggedFlag || mTalkingFlag) {
             return;
         }
 
@@ -447,18 +448,19 @@ public class ConciergeService extends Service {
         });
     }
 
-    private void speechVoice(int resId) {
-        if (mMediaPlayer == null) {
-            mMediaPlayer = MediaPlayer.create(this, resId);
-            mMediaPlayer.start();
-            return;
-        }
-        if (mMediaPlayer.isPlaying()) {
-            mMediaPlayer.stop();
-//            mMediaPlayer.prepare();
-        }
-        Log.i(TAG, "speech voice");
-        mMediaPlayer = MediaPlayer.create(this, resId);
-        mMediaPlayer.start();
+    /**
+     * ももちゃんにしゃべらせる
+     * @param resId
+     */
+    private void speechMomo(int resId) {
+        mTalkingFlag = true;
+        changeAnimeType(MOMO_TALK);
+        Utils.speechVoice(sContext, resId, new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                mTalkingFlag = false;
+                changeAnimeType(MOMO_SMILE_A);
+            }
+        });
     }
 }
