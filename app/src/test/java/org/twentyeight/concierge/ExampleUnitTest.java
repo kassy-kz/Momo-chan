@@ -1,4 +1,4 @@
-package org.twentyeight.concierge;
+package org.twentyeight.momo;
 
 import org.junit.Test;
 

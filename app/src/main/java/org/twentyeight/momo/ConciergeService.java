@@ -1,26 +1,22 @@
-package org.twentyeight.concierge;
+package org.twentyeight.momo;
 
-import android.annotation.TargetApi;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.media.MediaPlayer;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import java.util.Locale;
+
 import java.util.Random;
 import android.widget.ImageView;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.Random;
 import java.util.HashMap;
 
 /**

@@ -1,6 +1,5 @@
-package org.twentyeight.concierge;
+package org.twentyeight.momo;
 
-import android.annotation.TargetApi;
 import android.app.AppOpsManager;
 import android.content.ContentResolver;
 import android.content.Context;

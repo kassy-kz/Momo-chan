@@ -1,4 +1,4 @@
-package org.twentyeight.concierge;
+package org.twentyeight.momo;
 
 import android.app.Notification;
 import android.app.NotificationManager;
