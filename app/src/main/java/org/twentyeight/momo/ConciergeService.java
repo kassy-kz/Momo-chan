@@ -23,21 +23,20 @@ import java.util.HashMap;
  * ももちゃんのOverlay表示と Usage変化による応答（アプリ起動をチェック）するサービス
  */
 public class ConciergeService extends Service {
-    WindowManager.LayoutParams prms;
+    private static final long CYCLE_ANIME = 500;
+    private static final int WALK_COUNT_MAX = 120;
 
     private static final String TAG = "ConciergeService";
-    private final Context context = this;
     private View view;
     private WindowManager wm;
-    WindowManager.LayoutParams params;
-    Handler mHnadler;
+    private WindowManager.LayoutParams params;
+    private Handler mHnadler;
     private int mWalkCounter;
-    private static final int WALK_COUNT_MAX = 120;
     private Timer mWalkStartTimer;
     private Timer mWalkTimer;
     private Timer mAppUsageTimer;
     private String mBeforeApp = "";
-
+    private Timer mImageChangeTimer;
 
     // 現在表示したいID(R.id.hoge)
     private int currentImageViewId = 0;
@@ -62,6 +61,18 @@ public class ConciergeService extends Service {
 
     // 音声再生
     MediaPlayer mMediaPlayer = null;
+
+    // ももちゃんのImageView
+    ImageView mMainImageView;
+    private int mAnimeType = 0;
+    private int mAnimeCount = 0;
+
+    private HashMap<Integer, int[]> animeImageMap = new HashMap<>();
+
+    private void setImageMap() {
+        animeImageMap.put(0, new int[]{R.drawable.idle_r1, R.drawable.idle_r2});
+        animeImageMap.put(1, new int[]{R.drawable.walkright_r1, R.drawable.walkright_r2, R.drawable.walkright_r3});
+    }
 
     /**
      * アニメデータ保持クラス
@@ -180,7 +191,7 @@ public class ConciergeService extends Service {
         mTimer.schedule( new TimerTask(){
             @Override
             public void run() {
-                mHandler.post( new Runnable() {
+                mHandler.post(new Runnable() {
                     public void run() {
                         // 設定されている種類に応じた画面遷移(アニメーション(=画像差し替え))
                         update();
@@ -281,10 +292,14 @@ public class ConciergeService extends Service {
 //        mTts = new TextToSpeech(this, this);
 
         // 定期実行のタイマー設定
-        this.currentImageViewId = R.id.characterImageView;
-        setTimer();
-
+//        this.currentImageViewId = R.id.characterImageView;
+//        setTimer();
+        setImageMap();
+        mMainImageView = (ImageView) view.findViewById(R.id.characterImageView);
+        setImageChangeTimer();
     }
+
+
 
     @Override
     public void onDestroy() {
@@ -304,12 +319,52 @@ public class ConciergeService extends Service {
         if (mAppUsageTimer != null) {
             mAppUsageTimer.cancel();
         }
+        if (mImageChangeTimer != null) {
+            mImageChangeTimer.cancel();
+        }
     }
 
     @Override
     public IBinder onBind(Intent intent) {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    /**
+     * アニメーション用のタイマーをセットする
+     */
+    private void setImageChangeTimer() {
+        mImageChangeTimer = new Timer(true);
+        mImageChangeTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        changeMainImage();
+                    }
+                });
+            }
+        }, CYCLE_ANIME, CYCLE_ANIME);
+    }
+
+    /**
+     * ももちゃんの画像を差し替える
+     */
+    private void changeMainImage() {
+        int[] animeImages = animeImageMap.get(mAnimeType);
+        int imageId = animeImages[mAnimeCount % animeImages.length];
+        mMainImageView.setImageResource(imageId);
+        mAnimeCount++;
+    }
+
+    /**
+     * アニメの種別を変更する
+     * @param type
+     */
+    private void changeAnimeType(int type) {
+        mAnimeCount = 0;
+        mAnimeType = type;
     }
 
     private class DragViewListener implements View.OnTouchListener {
@@ -340,6 +395,8 @@ public class ConciergeService extends Service {
             // 画像と重ならなければスルーする
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
+                    changeAnimeType(0);
+
                     downX = x;
                     downY = y;
                     dragStartX = x;
@@ -358,6 +415,8 @@ public class ConciergeService extends Service {
 //                    Log.i(TAG, "update params " + params.x + ","+params.y);
                     break;
                 case MotionEvent.ACTION_UP:
+                    // ドラッグをしていない時
+                    changeAnimeType(1);
                     if (Math.abs(downX - x) < 8 && Math.abs(downY - y) < 8) {
                         Random random = new Random();
                         int rand = random.nextInt(5);
