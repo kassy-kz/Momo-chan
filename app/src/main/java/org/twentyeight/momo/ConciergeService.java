@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.IBinder;
@@ -57,9 +58,9 @@ public class ConciergeService extends Service {
     // 歩き始めてから歩き終わるまで
     private static final int WALK_COUNT_MAX = 180; // 60fps x 3秒
 
-
     private View mOverlayView;
     private WindowManager mWindowManager;
+    private WindowManager.LayoutParams mTmpParams;
     private WindowManager.LayoutParams mParams;
     private Handler mHandler;
     private String mBeforeApp = "";
@@ -80,6 +81,7 @@ public class ConciergeService extends Service {
     private boolean mDraggedFlag = false;
     private boolean mTalkingFlag = false;
     private static Context sContext;
+    private boolean mMomoAtWall = false;
 
     /**
      * アニメーションのパターンの定義
@@ -335,7 +337,14 @@ public class ConciergeService extends Service {
                     int deltaY = y - dragStartY;
                     mParams.x += deltaX;
                     mParams.y += deltaY;
-                    mWindowManager.updateViewLayout(view, mParams);
+                    // 画面外に出ないかチェック
+                    checkMomoAtWall(mParams);
+                    if (!mMomoAtWall) {
+                        mWindowManager.updateViewLayout(view, mParams);
+                    } else {
+                        mParams.x -= deltaX;
+                        mParams.y -= deltaY;
+                    }
                     dragStartX = x;
                     dragStartY = y;
 //                    Log.i(TAG, "update mParams " + mParams.x + ","+mParams.y);
@@ -431,6 +440,7 @@ public class ConciergeService extends Service {
         }
 
         mHandler.post(new Runnable() {
+            // 歩く
             @Override
             public void run() {
                 try {
@@ -438,7 +448,14 @@ public class ConciergeService extends Service {
                     int deltaY = (int) (2 * Math.sin(radian));
                     mParams.x += deltaX;
                     mParams.y += deltaY;
-                    mWindowManager.updateViewLayout(mOverlayView, mParams);
+                    checkMomoAtWall(mParams);
+                    if (!mMomoAtWall) {
+                        mWindowManager.updateViewLayout(mOverlayView, mParams);
+                    } else {
+                        mParams.x -= deltaX;
+                        mParams.y -= deltaY;
+                        changeAnimeType(MOMO_TROUBLE_B);
+                    }
                 }
                 // タイミングによっては例外はくこともあるのでキャッチしておく
                 catch (IllegalArgumentException e) {
@@ -462,5 +479,36 @@ public class ConciergeService extends Service {
                 changeAnimeType(MOMO_SMILE_A);
             }
         });
+    }
+
+    /**
+     * ももちゃんが壁際にいるか（これ以上歩けないか）調査する
+     * @return
+     */
+    private void checkMomoAtWall(WindowManager.LayoutParams params) {
+        int momoWidth = mMainImageView.getWidth();
+        int momoHeight = mMainImageView.getHeight();
+        Point point = new Point();
+        mWindowManager.getDefaultDisplay().getSize(point);
+        int dispWidth = point.x;
+        int dispHeight = point.y;
+
+        Log.i(TAG, "params " + params.x + "," + params.y);
+
+        if ( (params.x - momoWidth/2) < -dispWidth/2 ) {
+            mMomoAtWall = true;
+            Log.i(TAG, "  wall");
+        } else if (dispWidth/2 < (params.x + momoWidth/2)) {
+            mMomoAtWall = true;
+            Log.i(TAG, "  wall");
+        } else if ((params.y - momoHeight/2) < -dispHeight/2 ) {
+            mMomoAtWall = true;
+            Log.i(TAG, "  wall");
+        } else if (dispHeight/2 < (params.y + momoHeight/2)) {
+            mMomoAtWall = true;
+            Log.i(TAG, "  wall");
+        } else {
+            mMomoAtWall = false;
+        }
     }
 }
