@@ -71,7 +71,7 @@ public class ConciergeService extends Service {
 
     private void setImageMap() {
         animeImageMap.put(0, new int[]{R.drawable.idle_r1, R.drawable.idle_r2});
-        animeImageMap.put(1, new int[]{R.drawable.walkright_r1, R.drawable.walkright_r2, R.drawable.walkright_r3});
+        animeImageMap.put(1, new int[]{R.drawable.walkright_r1, R.drawable.walkright_r2, R.drawable.walkright_r1, R.drawable.walkright_r3});
     }
 
     /**
@@ -334,6 +334,9 @@ public class ConciergeService extends Service {
      * アニメーション用のタイマーをセットする
      */
     private void setImageChangeTimer() {
+        if (mImageChangeTimer != null) {
+            mImageChangeTimer.cancel();
+        }
         mImageChangeTimer = new Timer(true);
         mImageChangeTimer.schedule(new TimerTask() {
             @Override
@@ -345,7 +348,7 @@ public class ConciergeService extends Service {
                     }
                 });
             }
-        }, CYCLE_ANIME, CYCLE_ANIME);
+        }, 0, CYCLE_ANIME);
     }
 
     /**
@@ -365,6 +368,7 @@ public class ConciergeService extends Service {
     private void changeAnimeType(int type) {
         mAnimeCount = 0;
         mAnimeType = type;
+        setImageChangeTimer();
     }
 
     private class DragViewListener implements View.OnTouchListener {
