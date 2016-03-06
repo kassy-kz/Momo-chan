@@ -75,7 +75,7 @@ public class MyNotificationListenerService extends NotificationListenerService {
 
 //        speechText("通知を待ち受けます");
         // 最初のあいさつ
-        speechVoice(R.raw.trg_random_himomose);
+        speechVoice(R.raw.mm_21_random_himomoseyuri);
 
         mReceiver = new MyReceiver(this);
         registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_SCREEN_ON));
@@ -140,27 +140,27 @@ public class MyNotificationListenerService extends NotificationListenerService {
         Log.i(TAG, "tag         : " + tag);
         Log.i(TAG, "tostring:" + sbn.toString());
 
-
         // 受信した結果をBLEに投げてみる
         // いくつかのアプリは特別扱いしよう
         // Gmailの場合
         if("com.google.android.gm".equals(packageName)) {
             Log.i(TAG, "app: Gmail");
-            speechVoice(R.raw.trg_mail_recieve_3);
+            speechVoice(R.raw.mm_119_mailapp_todoitayo);
         }
         // Twitterの場合
         else if("com.twitter.android".equals(packageName)) {
             Log.i(TAG, "app: twitter");
-            speechVoice(R.raw.trg_twitter);
+            speechVoice(R.raw.mm_121_twitter_todoitayo);
         }
         // LINEの場合
         else if("jp.naver.line.android".equals(packageName)) {
             Log.i(TAG, "app: LINE");
-            speechVoice(R.raw.trg_line);
+            speechVoice(R.raw.mm_123_line_todoitayo);
         }
         // その他
         else {
             Log.i(TAG, "app: other");
+            speechVoice(R.raw.mm_145_mailapp_nankakiteruyo);
         }
     }
 

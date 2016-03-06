@@ -180,38 +180,7 @@ public class ConciergeService extends Service {
         mAppUsageTimer.schedule(new TimerTask() {
             @Override
             public void run() {
-                String app = Utils.getTopApplicationPackage(ConciergeService.this);
-                if (!mBeforeApp.equals(app)) {
-                    Log.i(TAG, "app : " +  app);
-                    mBeforeApp = app;
-                    if ("com.google.android.dialer".equals(app)) {
-                        speechMomo(R.raw.trg_phoneappstart);
-                    } else if ("com.google.android.gm".equals(app)) {
-                        speechMomo(R.raw.trg_mail_app_start);
-                    } else if ("com.amazon.kindle".equals(app)) {
-                        speechMomo(R.raw.trg_kindle);
-                    } else if ("com.google.android.music".equals(app)) {
-                        speechMomo(R.raw.trg_musicappstart);
-                    } else if ("com.google.android.GoogleCamera".equals(app)) {
-                        speechMomo(R.raw.trg_camera_on);
-                    } else if ("com.android.chrome".equals(app)) {
-                        speechMomo(R.raw.trg_browser);
-                    } else if ("jp.naver.line.android".equals(app)) {
-                        speechMomo(R.raw.trg_line_app_start);
-                    } else if ("com.android.providers.downloads".equals(app)) {
-                        speechMomo(R.raw.trg_searchappli);
-                    } else if ("jp.co.rakuten.kobo".equals(app)) {
-                        speechMomo(R.raw.trg_kobo);
-                    } else if ("jp.co.rakuten.appmarket".equals(app)) {
-                        speechMomo(R.raw.trg_rakuten);
-                    } else if ("com.google.android.apps.maps".equals(app)) {
-                        speechMomo(R.raw.trg_map_dokoikuno);
-                    } else if ("jp.co.yahoo.android.apps.transit".equals(app)) {
-                        speechMomo(R.raw.trg_norikae_next);
-                    } else if ("jp.co.jorudan.nrkj".equals(app)) {
-                        speechMomo(R.raw.trg_norikae_next);
-                    }
-                }
+                checkLaunchingApp();
             }
         }, 100, 100);
 
@@ -219,6 +188,44 @@ public class ConciergeService extends Service {
         setImageMap();
         mMainImageView = (ImageView) mOverlayView.findViewById(R.id.characterImageView);
         setImageChangeTimer();
+    }
+
+    /**
+     * どのアプリが起動してるか調べる
+     */
+    private void checkLaunchingApp() {
+        String app = Utils.getTopApplicationPackage(ConciergeService.this);
+        if (!mBeforeApp.equals(app)) {
+            Log.i(TAG, "app : " + app);
+            mBeforeApp = app;
+            if ("com.google.android.dialer".equals(app)) {
+                speechMomo(R.raw.mm_130_phone_denwakakemasune);
+            } else if ("com.google.android.gm".equals(app)) {
+                speechMomo(R.raw.mm_15_mailapp_daijinayou);
+            } else if ("com.amazon.kindle".equals(app)) {
+                speechMomo(R.raw.mm_1_kindle_honyomuno);
+            } else if ("com.google.android.music".equals(app)) {
+                speechMomo(R.raw.mm_131_music_ongakukikuno);
+            } else if ("com.google.android.GoogleCamera".equals(app)) {
+                speechMomo(R.raw.mm_9_camera_makasete);
+            } else if ("com.android.chrome".equals(app)) {
+                speechMomo(R.raw.mm_13_browser_shirabemono);
+            } else if ("jp.naver.line.android".equals(app)) {
+                speechMomo(R.raw.mm_201_line_surunone);
+            } else if ("com.android.providers.downloads".equals(app)) {
+                speechMomo(R.raw.mm_204_search_sagasunone);
+            } else if ("jp.co.rakuten.kobo".equals(app)) {
+                speechMomo(R.raw.mm_206_kobo_kobodane);
+            } else if ("jp.co.rakuten.appmarket".equals(app)) {
+                speechMomo(R.raw.mm_205_rakuten_tokubetsunakanji);
+            } else if ("com.google.android.apps.maps".equals(app)) {
+                speechMomo(R.raw.mm_207_map_dokoikuno);
+            } else if ("jp.co.yahoo.android.apps.transit".equals(app)) {
+                speechMomo(R.raw.mm_199_norikae_tuginonorikae);
+            } else if ("jp.co.jorudan.nrkj".equals(app)) {
+                speechMomo(R.raw.mm_199_norikae_tuginonorikae);
+            }
+        }
     }
 
     /**
@@ -358,19 +365,19 @@ public class ConciergeService extends Service {
                         int rand = random.nextInt(5);
                         switch (rand) {
                             case 0:
-                                speechMomo(R.raw.trg_random_makasete);
+                                speechMomo(R.raw.mm_22_random_makasete);
                                 break;
                             case 1:
-                                speechMomo(R.raw.trg_random_nodo);
+                                speechMomo(R.raw.mm_36_random_nodogakawaite);
                                 break;
                             case 2:
-                                speechMomo(R.raw.trg_random_soba);
+                                speechMomo(R.raw.mm_42_random_zuttosobani);
                                 break;
                             case 3:
-                                speechMomo(R.raw.trg_random_todayganbaru);
+                                speechMomo(R.raw.mm_20_random_kyoumoganbaru);
                                 break;
                             case 4:
-                                speechMomo(R.raw.trg_random_himomose);
+                                speechMomo(R.raw.mm_21_random_himomoseyuri);
                                 break;
                         }
                     }
