@@ -84,7 +84,7 @@ public class ConciergeService extends Service {
     private static Context sContext;
     private boolean mMomoAtWall = false;
     private boolean mGuruguruFlag = false;
-    private boolean mSleepFlag = false;
+    private int mSleepFlag = 0;
 
     /**
      * アニメーションのパターンの定義
@@ -402,8 +402,8 @@ public class ConciergeService extends Service {
     private void touchRandomSpeak() {
 
         // 寝てた場合はびっくりする
-        if (mSleepFlag) {
-            mSleepFlag = false;
+        if (mSleepFlag > 0) {
+            mSleepFlag = 0;
             changeAnimeType(MOMO_SURPRISE);
             speechMomo(R.raw.mm_57_random_bikkurisitaa, false);
             return;
@@ -439,6 +439,11 @@ public class ConciergeService extends Service {
      */
     private void startWalkCharacter() {
 
+        // 寝てる間は歩かない
+        if (mSleepFlag > 0) {
+            mSleepFlag--;
+            return;
+        }
         // ドラッグ中 or 喋り中なら歩かない
         if (mGuruguruFlag) {
             mGuruguruFlag = false;
@@ -470,8 +475,10 @@ public class ConciergeService extends Service {
         }
         // 寝る
         else {
-            mSleepFlag = true;
+            mSleepFlag = 5;
             changeAnimeType(MOMO_SLEEP);
+            // 寝たら歩かない
+            return;
         }
 
         mWalkTimer.schedule(new TimerTask() {
