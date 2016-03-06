@@ -83,11 +83,13 @@ public class ConciergeService extends Service {
     private boolean mTalkingFlag = false;
     private static Context sContext;
     private boolean mMomoAtWall = false;
+    private boolean mGuruguruFlag = false;
 
     /**
      * アニメーションのパターンの定義
      */
     private HashMap<Integer, int[]> mAnimeImageMap = new HashMap<>();
+
     private void setImageMap() {
         // 素立ち
         mAnimeImageMap.put(MOMO_STAND, new int[]{R.drawable.idle_r1, R.drawable.idle_r2});
@@ -394,6 +396,7 @@ public class ConciergeService extends Service {
                     else {
                         if (totalDrag > DRAG_LENGTH_GURUGURU) {
                             changeAnimeType(MOMO_TROUBLE_B);
+                            mGuruguruFlag = true;
                             speechMomo(R.raw.mm_4_error_huee, false);
                         } else {
                             changeAnimeType(MOMO_TROUBLE_A);
@@ -410,7 +413,12 @@ public class ConciergeService extends Service {
      * キャラを歩かせる
      */
     private void startWalkCharacter() {
+
         // ドラッグ中 or 喋り中なら歩かない
+        if (mGuruguruFlag) {
+            mGuruguruFlag = false;
+            return;
+        }
         if (mTalkingFlag) {
             return;
         }

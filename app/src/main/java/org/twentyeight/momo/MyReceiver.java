@@ -37,7 +37,7 @@ public class MyReceiver extends BroadcastReceiver {
         }
         // 充電開始
         else if (Intent.ACTION_POWER_CONNECTED.equals(action)) {
-            speechVoice(R.raw.mm_141_battery_gohantaberune);
+            speechVoice(R.raw.mm_76_battery_gohantaberune);
         }
         // 充電終了
         else if (Intent.ACTION_POWER_DISCONNECTED.equals(action)) {
@@ -47,7 +47,7 @@ public class MyReceiver extends BroadcastReceiver {
 
             // バッテリー残量で振り分け
             if (batteryLevel > 90) {
-                speechVoice(R.raw.mm_139_battery_genkimantan);
+                speechVoice(R.raw.mm_74_battery_genkimantan);
             } else {
                 speechVoice(R.raw.mm_113_battery_mottohoshiina);
             }
