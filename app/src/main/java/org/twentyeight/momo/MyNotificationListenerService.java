@@ -82,7 +82,7 @@ public class MyNotificationListenerService extends NotificationListenerService {
 
 //        speechText("通知を待ち受けます");
         // 最初のあいさつ
-        speechVoice(R.raw.mm_21_random_himomoseyuri);
+        Utils.speechVoice(this, R.raw.mm_21_random_himomoseyuri, null);
 
         mReceiver = new MyReceiver(this);
         registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_SCREEN_ON));
@@ -152,17 +152,17 @@ public class MyNotificationListenerService extends NotificationListenerService {
         // Gmailの場合
         if ("com.google.android.gm".equals(packageName)) {
             Log.i(TAG, "app: Gmail");
-            speechVoice(R.raw.mm_119_mailapp_todoitayo);
+            Utils.speechVoice(this, R.raw.mm_119_mailapp_todoitayo, null);
         }
         // Twitterの場合
         else if ("com.twitter.android".equals(packageName)) {
             Log.i(TAG, "app: twitter");
-            speechVoice(R.raw.mm_121_twitter_todoitayo);
+            Utils.speechVoice(this, R.raw.mm_121_twitter_todoitayo, null);
         }
         // LINEの場合
         else if ("jp.naver.line.android".equals(packageName)) {
             Log.i(TAG, "app: LINE");
-            speechVoice(R.raw.mm_123_line_todoitayo);
+            Utils.speechVoice(this, R.raw.mm_123_line_todoitayo, null);
         }
         // 本アプリの場合
         else if (getPackageName().equals(packageName)) {
@@ -171,7 +171,7 @@ public class MyNotificationListenerService extends NotificationListenerService {
         // その他
         else {
             Log.i(TAG, "app: other");
-            speechVoice(R.raw.mm_145_mailapp_nankakiteruyo);
+            Utils.speechVoice(this, R.raw.mm_145_mailapp_nankakiteruyo, null);
         }
     }
 
@@ -219,29 +219,5 @@ public class MyNotificationListenerService extends NotificationListenerService {
         NotificationManager manager = (NotificationManager)
                 getSystemService(Service.NOTIFICATION_SERVICE);
         manager.cancel(NOTIFICATION_ID);
-    }
-
-    /**
-     * 音声をしゃべる
-     * @param resId
-     */
-    private void speechVoice(int resId) {
-        // 稼働中でないならしゃべらない
-        if (!mIsRunning) {
-            return;
-        }
-
-        if (mMediaPlayer == null) {
-            mMediaPlayer = MediaPlayer.create(this, resId);
-            mMediaPlayer.start();
-            return;
-        }
-        if (mMediaPlayer.isPlaying()) {
-            mMediaPlayer.stop();
-//            mMediaPlayer.prepare();
-        }
-        Log.i(TAG, "speech voice");
-        mMediaPlayer = MediaPlayer.create(this, resId);
-        mMediaPlayer.start();
     }
 }

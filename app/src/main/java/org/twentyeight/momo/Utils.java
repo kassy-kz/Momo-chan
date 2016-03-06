@@ -67,7 +67,9 @@ public class Utils {
             sMediaPlayer.stop();
         }
         sMediaPlayer = MediaPlayer.create(context, resId);
-        sMediaPlayer.setOnCompletionListener(listener);
+        if (listener != null) {
+            sMediaPlayer.setOnCompletionListener(listener);
+        }
         sMediaPlayer.start();
     }
 }
