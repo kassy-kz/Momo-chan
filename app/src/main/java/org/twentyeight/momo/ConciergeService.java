@@ -84,6 +84,7 @@ public class ConciergeService extends Service {
     private static Context sContext;
     private boolean mMomoAtWall = false;
     private boolean mGuruguruFlag = false;
+    private boolean mSleepFlag = false;
 
     /**
      * アニメーションのパターンの定義
@@ -376,25 +377,7 @@ public class ConciergeService extends Service {
                 case MotionEvent.ACTION_UP:
                     // ドラッグをしていない時 => なんか喋らせる
                     if (Math.abs(downX - x) < 8 && Math.abs(downY - y) < 8) {
-                        Random random = new Random();
-                        int rand = random.nextInt(5);
-                        switch (rand) {
-                            case 0:
-                                speechMomo(R.raw.mm_22_random_makasete);
-                                break;
-                            case 1:
-                                speechMomo(R.raw.mm_36_random_nodogakawaite);
-                                break;
-                            case 2:
-                                speechMomo(R.raw.mm_42_random_zuttosobani);
-                                break;
-                            case 3:
-                                speechMomo(R.raw.mm_20_random_kyoumoganbaru);
-                                break;
-                            case 4:
-                                speechMomo(R.raw.mm_21_random_himomoseyuri);
-                                break;
-                        }
+                        touchRandomSpeak();
                     }
                     // ドラッグをしてたとき
                     else {
@@ -410,6 +393,44 @@ public class ConciergeService extends Service {
             }
             // イベント処理完了
             return true;
+        }
+    }
+
+    /**
+     * タッチしたときにランダムでしゃべる
+     */
+    private void touchRandomSpeak() {
+
+        // 寝てた場合はびっくりする
+        if (mSleepFlag) {
+            mSleepFlag = false;
+            changeAnimeType(MOMO_SURPRISE);
+            speechMomo(R.raw.mm_57_random_bikkurisitaa, false);
+            return;
+        }
+
+        // 起きてた場合はランダムトーク
+        Random random = new Random();
+        int rand = random.nextInt(6);
+        switch (rand) {
+            case 0:
+                speechMomo(R.raw.mm_22_random_makasete);
+                break;
+            case 1:
+                speechMomo(R.raw.mm_36_random_nodogakawaite);
+                break;
+            case 2:
+                speechMomo(R.raw.mm_42_random_zuttosobani);
+                break;
+            case 3:
+                speechMomo(R.raw.mm_20_random_kyoumoganbaru);
+                break;
+            case 4:
+                speechMomo(R.raw.mm_21_random_himomoseyuri);
+                break;
+            case 5:
+                speechMomo(R.raw.mm_23_random_nanishiru);
+                break;
         }
     }
 
@@ -433,7 +454,7 @@ public class ConciergeService extends Service {
         mWalkCounter = 0;
         mWalkTimer = new Timer();
         Random random = new Random();
-        final double degrees = (double)random.nextInt(360);
+        final double degrees = (double)random.nextInt(400);
         final double radian = Math.toRadians(degrees);
 
         if (degrees < 45) {
@@ -444,8 +465,13 @@ public class ConciergeService extends Service {
             changeAnimeType(MOMO_WALK_L);
         } else if (degrees < 315) {
             changeAnimeType(MOMO_WALK_U);
-        } else {
+        } else if (degrees < 360) {
             changeAnimeType(MOMO_WALK_R);
+        }
+        // 寝る
+        else {
+            mSleepFlag = true;
+            changeAnimeType(MOMO_SLEEP);
         }
 
         mWalkTimer.schedule(new TimerTask() {
