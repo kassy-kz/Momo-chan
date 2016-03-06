@@ -60,6 +60,10 @@ public class MyReceiver extends BroadcastReceiver {
         else if (Intent.ACTION_CAMERA_BUTTON.equals(action)) {
             speechVoice(R.raw.mm_10_camera_hicheeze);
         }
+        // アラーム
+        else if (Utils.ACTION_ALARM.equals(action)) {
+            speechVoice(R.raw.mm_126_time_kisyounojikan);
+        }
     }
 
 

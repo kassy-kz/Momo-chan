@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.MediaPlayer;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.support.v7.app.NotificationCompat;
@@ -92,7 +91,7 @@ public class MyNotificationListenerService extends NotificationListenerService {
         registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_POWER_DISCONNECTED));
         registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_CAMERA_BUTTON));
         registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_USER_PRESENT));
-
+        registerReceiver(mReceiver, new IntentFilter(Utils.ACTION_ALARM));
         return START_NOT_STICKY;
     }
 
@@ -141,12 +140,11 @@ public class MyNotificationListenerService extends NotificationListenerService {
 
         // ログに表示してみる
         Log.i(TAG,"id:" + id + " time:" +time + " isClearable:" + clearable + " isOngoing:" + ongoing);
-        Log.i(TAG,"packageName : " + packageName);
+        Log.i(TAG, "packageName : " + packageName);
         Log.i(TAG,"tickerText  : " + text);
         Log.i(TAG, "tag         : " + tag);
         Log.i(TAG, "tostring:" + sbn.toString());
 
-        // 受信した結果をBLEに投げてみる
         // いくつかのアプリは特別扱いしよう
         // Gmailの場合
         if ("com.google.android.gm".equals(packageName)) {

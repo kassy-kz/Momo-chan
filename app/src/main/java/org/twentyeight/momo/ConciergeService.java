@@ -227,6 +227,10 @@ public class ConciergeService extends Service {
                 speechMomo(R.raw.mm_199_norikae_tuginonorikae);
             } else if ("jp.co.jorudan.nrkj".equals(app)) {
                 speechMomo(R.raw.mm_199_norikae_tuginonorikae);
+            } else if ("com.google.android.apps.photos".equals(app)) {
+                speechMomo(R.raw.mm_198_picture_kireinashashin);
+            } else if ("com.android.vending".equals(app)) {
+                speechMomo(R.raw.mm_204_search_sagasunone);
             }
         }
     }
@@ -510,16 +514,21 @@ public class ConciergeService extends Service {
      */
     private void speechMomo(int resId, boolean isTalk) {
         mTalkingFlag = true;
+        // おしゃべり
         if (isTalk) {
             changeAnimeType(MOMO_TALK);
+            Utils.speechVoice(sContext, resId, null);
         }
-        Utils.speechVoice(sContext, resId, new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                mTalkingFlag = false;
-                changeAnimeType(MOMO_SMILE_A);
-            }
-        });
+        // それ以外
+        else {
+            Utils.speechVoice(sContext, resId, new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    mTalkingFlag = false;
+                    changeAnimeType(MOMO_SMILE_A);
+                }
+            });
+        }
     }
 
     /**
@@ -534,7 +543,7 @@ public class ConciergeService extends Service {
         int dispWidth = point.x;
         int dispHeight = point.y;
 
-        Log.i(TAG, "params " + params.x + "," + params.y);
+//        Log.i(TAG, "params " + params.x + "," + params.y);
 
         if ( (params.x - momoWidth/2) < -dispWidth/2 ) {
             mMomoAtWall = true;

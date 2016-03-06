@@ -15,6 +15,8 @@ public class Utils {
 
     private static MediaPlayer sMediaPlayer;
 
+    public static final String ACTION_ALARM = "com.android.deskclock.ALARM_ALERT";
+
     /**
      * トップに起動しているActivityのpackage nameを指定する
      * @param context
