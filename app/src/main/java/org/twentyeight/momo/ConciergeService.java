@@ -517,10 +517,6 @@ public class ConciergeService extends Service {
         // おしゃべり
         if (isTalk) {
             changeAnimeType(MOMO_TALK);
-            Utils.speechVoice(sContext, resId, null);
-        }
-        // それ以外
-        else {
             Utils.speechVoice(sContext, resId, new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
@@ -528,6 +524,10 @@ public class ConciergeService extends Service {
                     changeAnimeType(MOMO_SMILE_A);
                 }
             });
+        }
+        // それ以外
+        else {
+            Utils.speechVoice(sContext, resId, null);
         }
     }
 
