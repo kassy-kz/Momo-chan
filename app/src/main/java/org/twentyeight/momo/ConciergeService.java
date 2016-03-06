@@ -232,6 +232,16 @@ public class ConciergeService extends Service {
                 speechMomo(R.raw.mm_198_picture_kireinashashin);
             } else if ("com.android.vending".equals(app)) {
                 speechMomo(R.raw.mm_204_search_sagasunone);
+            } else if ("com.google.android.calendar".equals(app)) {
+                speechMomo(R.raw.mm_208_calender_donnayoteiga);
+            } else if ("jp.co.bandainamcoent.BNEI0242".equals(app)) {
+                speechMomo(R.raw.mm_11_game_tanoshisou);
+            } else if ("jp.gungho.pad".equals(app)) {
+                speechMomo(R.raw.mm_11_game_tanoshisou);
+            } else if ("jp.co.mixi.monsterstrike".equals(app)) {
+                speechMomo(R.raw.mm_11_game_tanoshisou);
+            } else if ("jp.colopl.wcat".equals(app)) {
+                speechMomo(R.raw.mm_11_game_tanoshisou);
             }
         }
     }
