@@ -53,6 +53,13 @@ public class MyNotificationListenerService extends NotificationListenerService {
         sSelf.mIsRunning = false;
     }
 
+    /**
+     * サービスが今稼働中か否か調べる
+     * @return
+     */
+    public static boolean isRunning() {
+        return sSelf.mIsRunning;
+    }
 
     /**
      * onStartCommand
@@ -143,19 +150,23 @@ public class MyNotificationListenerService extends NotificationListenerService {
         // 受信した結果をBLEに投げてみる
         // いくつかのアプリは特別扱いしよう
         // Gmailの場合
-        if("com.google.android.gm".equals(packageName)) {
+        if ("com.google.android.gm".equals(packageName)) {
             Log.i(TAG, "app: Gmail");
             speechVoice(R.raw.mm_119_mailapp_todoitayo);
         }
         // Twitterの場合
-        else if("com.twitter.android".equals(packageName)) {
+        else if ("com.twitter.android".equals(packageName)) {
             Log.i(TAG, "app: twitter");
             speechVoice(R.raw.mm_121_twitter_todoitayo);
         }
         // LINEの場合
-        else if("jp.naver.line.android".equals(packageName)) {
+        else if ("jp.naver.line.android".equals(packageName)) {
             Log.i(TAG, "app: LINE");
             speechVoice(R.raw.mm_123_line_todoitayo);
+        }
+        // 本アプリの場合
+        else if (getPackageName().equals(packageName)) {
+            // do nothing
         }
         // その他
         else {

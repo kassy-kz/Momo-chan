@@ -49,10 +49,12 @@ public class MainActivity extends AppCompatActivity {
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "サービス起動");
-                startService(new Intent(MainActivity.this, ConciergeService.class));
-                Intent serviceIntent = new Intent(MainActivity.this, MyNotificationListenerService.class);
-                startService(serviceIntent);
+                if (!MyNotificationListenerService.isRunning()) {
+                    Log.d(TAG, "サービス起動");
+                    startService(new Intent(MainActivity.this, ConciergeService.class));
+                    Intent serviceIntent = new Intent(MainActivity.this, MyNotificationListenerService.class);
+                    startService(serviceIntent);
+                }
             }
         });
 
@@ -60,11 +62,13 @@ public class MainActivity extends AppCompatActivity {
         btnStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // これは効かない
+                if (MyNotificationListenerService.isRunning()) {
+                    // これは効かない
 //                stopService(new Intent(MainActivity.this, MyNotificationListenerService.class));
-                // サービスを停止する
-                stopService(new Intent(MainActivity.this, ConciergeService.class));
-                MyNotificationListenerService.stopNotificationService();
+                    // サービスを停止する
+                    stopService(new Intent(MainActivity.this, ConciergeService.class));
+                    MyNotificationListenerService.stopNotificationService();
+                }
             }
         });
     }
