@@ -1,8 +1,10 @@
 package org.twentyeight.momo;
 
+import android.app.AlertDialog;
 import android.app.AppOpsManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -11,8 +13,12 @@ import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 /**
  * 大前提！
@@ -26,6 +32,10 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_OVERLAY = 2;
     private static final int REQUEST_CODE_USAGE = 3;
     private static final int REQUEST_CODE_NOTI = 4;
+
+    private static final int PERMISSION_TYPE_OVERLAY = 1;
+    private static final int PERMISSION_TYPE_USAGE = 2;
+    private static final int PERMISSION_TYPE_NOTIFICATION = 3;
 
 
     @Override
@@ -62,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        Log.i(TAG, "onResume");
         getAllPermissioins();
     }
 
@@ -71,17 +82,20 @@ public class MainActivity extends AppCompatActivity {
      */
     private void getAllPermissioins() {
         if (!isOverlayAllowed()) {
-            getOverlayPermission();
+            Log.i(TAG, "get permission 1");
+            showManualDialog(R.drawable.manual1, PERMISSION_TYPE_OVERLAY);
             return;
         }
 
         if (!isUsageStatsAllowed()) {
-            getUsagePermission();
+            Log.i(TAG, "get permission 2");
+            showManualDialog(R.drawable.manual2, PERMISSION_TYPE_USAGE);
             return;
         }
 
         if (!isNotificationAllowed()) {
-            getNotificationPermission();
+            Log.i(TAG, "get permission 3");
+            showManualDialog(R.drawable.manual3, PERMISSION_TYPE_NOTIFICATION);
             return;
         }
     }
@@ -138,20 +152,56 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Notificationの許可をもらってるかどうか
+     * これが微妙に不安定というか、レス悪いというか...
      */
     private boolean isNotificationAllowed() {
+
         ContentResolver contentResolver = getContentResolver();
         String enabledNotificationListeners = Settings.Secure.getString(contentResolver, "enabled_notification_listeners");
         String packageName = getPackageName();
+        Log.i(TAG, "noti allowed : "+ enabledNotificationListeners);
+        Log.i(TAG, "contain : " + enabledNotificationListeners.contains(packageName));
         return !(enabledNotificationListeners == null || !enabledNotificationListeners.contains(packageName));
     }
 
     /**
      * パーミッション尋ねた結果
-     * パーミッションを全部もらうまで繰り返し尋ねる感じ
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode,  Intent data) {
-        getAllPermissioins();
+        Log.i(TAG, "onResult");
+        // Do nothing
+    }
+
+    /**
+     * ユーザーにルート名の入力を促すダイアログを表示する
+     */
+    private void showManualDialog(int resId, final int permissionType) {
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View view = inflater.inflate(R.layout.dialog_manual, null);
+        ImageView manualImage = (ImageView) view.findViewById(R.id.imgManualDialog);
+        manualImage.setImageResource(resId);
+        TextView manualText = (TextView) view.findViewById(R.id.txtManualDialog);
+        manualText.setText(R.string.manual_string);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        String title = getResources().getString(R.string.manual_title) + " " + permissionType + "（全部で３）";
+        builder.setTitle(title);
+        builder.setView(view);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (permissionType) {
+                    case PERMISSION_TYPE_OVERLAY:
+                        getOverlayPermission();
+                        break;
+                    case PERMISSION_TYPE_USAGE:
+                        getUsagePermission();
+                        break;
+                    case PERMISSION_TYPE_NOTIFICATION:
+                        getNotificationPermission();
+                        break;
+                }
+            }
+        }).show();
     }
 }

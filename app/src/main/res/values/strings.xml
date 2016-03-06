@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">ももちゃん</string>
     <string name="action_settings">Settings</string>
+    <string name="manual_string">この後設定画面に飛びます。アクセスを許可して戻ってきてください。（このアプリは端末の情報や個人情報を外部に送信することはありません）</string>
+    <string name="manual_title">パーミッション許可</string>
 </resources>
