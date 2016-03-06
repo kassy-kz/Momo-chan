@@ -63,6 +63,11 @@ public class Utils {
      * ももちゃんにしゃべらせる
      */
     public static void speechVoice(Context context, int resId, MediaPlayer.OnCompletionListener listener) {
+
+        // 停止中ならしゃべらない
+        if (!MyNotificationListenerService.isRunning()) {
+            return;
+        }
         if (sMediaPlayer != null && sMediaPlayer.isPlaying()) {
             sMediaPlayer.stop();
         }

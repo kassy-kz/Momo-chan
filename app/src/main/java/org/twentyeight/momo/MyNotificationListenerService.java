@@ -26,7 +26,6 @@ public class MyNotificationListenerService extends NotificationListenerService {
     private MyReceiver mReceiver;
 
     // 音声再生
-    MediaPlayer mMediaPlayer = null;
     private static MyNotificationListenerService sSelf;
 
     // このサービスは停止できないので、稼働中フラグを持つ

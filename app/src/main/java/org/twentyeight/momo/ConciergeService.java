@@ -313,6 +313,7 @@ public class ConciergeService extends Service {
         private int dragStartY = 0;
         private int downX = 0;
         private int downY = 0;
+        private int totalDrag = 0;
 
         public DragViewListener(View dragView) {
         }
@@ -323,7 +324,6 @@ public class ConciergeService extends Service {
             int x = (int) event.getRawX();
             int y = (int) event.getRawY();
 //            Log.i(TAG, "onTouch " + event.getAction() +" x,y : " + x + "," + y);
-
             // 画像と重ならなければスルーする
             switch (event.getAction()) {
                 // おした時
@@ -337,7 +337,6 @@ public class ConciergeService extends Service {
 
                 // ドラッグしたとき
                 case MotionEvent.ACTION_MOVE:
-                    changeAnimeType(MOMO_SURPRISE);
                     mDraggedFlag = true;
                     // 今回イベントでのView移動先の位置
                     int deltaX = x - dragStartX;
@@ -348,9 +347,17 @@ public class ConciergeService extends Service {
                     checkMomoAtWall(mParams);
                     if (!mMomoAtWall) {
                         mWindowManager.updateViewLayout(view, mParams);
+                        totalDrag += Math.abs(deltaX) + Math.abs(deltaY);
                     } else {
                         mParams.x -= deltaX;
                         mParams.y -= deltaY;
+                    }
+
+                    // ドラッグ距離に応じてももちゃんの表情をかえる
+                    if (totalDrag < 300) {
+                        changeAnimeType(MOMO_SURPRISE);
+                    } else {
+                        changeAnimeType(MOMO_TROUBLE_B);
                     }
                     dragStartX = x;
                     dragStartY = y;
@@ -458,10 +465,12 @@ public class ConciergeService extends Service {
                     checkMomoAtWall(mParams);
                     if (!mMomoAtWall) {
                         mWindowManager.updateViewLayout(mOverlayView, mParams);
-                    } else {
+                    }
+                    // 歩いて壁にぶつかった
+                    else {
                         mParams.x -= deltaX;
                         mParams.y -= deltaY;
-                        changeAnimeType(MOMO_TROUBLE_B);
+                        changeAnimeType(MOMO_QUESTION);
                     }
                 }
                 // タイミングによっては例外はくこともあるのでキャッチしておく
