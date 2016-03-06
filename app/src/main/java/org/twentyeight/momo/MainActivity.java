@@ -85,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
      * 繰り返し呼んで問題ない
      */
     private void getAllPermissioins() {
+        // オーバーレイの許可はAndroidM以上でのみ必要
         if (!isOverlayAllowed()) {
             Log.i(TAG, "get permission 1");
             showManualDialog(R.drawable.manual1, PERMISSION_TYPE_OVERLAY);
@@ -188,7 +189,14 @@ public class MainActivity extends AppCompatActivity {
         TextView manualText = (TextView) view.findViewById(R.id.txtManualDialog);
         manualText.setText(R.string.manual_string);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        String title = getResources().getString(R.string.manual_title) + " " + permissionType + "（全部で３）";
+
+        String postStr = "";
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            postStr = "（全部で3）";
+        } else {
+            postStr = "（全部で2）";
+        }
+        String title = getResources().getString(R.string.manual_title) + postStr;
         builder.setTitle(title);
         builder.setView(view);
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {

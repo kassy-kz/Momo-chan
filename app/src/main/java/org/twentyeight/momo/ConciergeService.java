@@ -57,10 +57,11 @@ public class ConciergeService extends Service {
     private static final int PERIOD_WALK_START = 10000;
     // 歩き始めてから歩き終わるまで
     private static final int WALK_COUNT_MAX = 180; // 60fps x 3秒
+    // ドラッグした時に目を回す距離
+    private static final int DRAG_LENGTH_GURUGURU = 2000;
 
     private View mOverlayView;
     private WindowManager mWindowManager;
-    private WindowManager.LayoutParams mTmpParams;
     private WindowManager.LayoutParams mParams;
     private Handler mHandler;
     private String mBeforeApp = "";
@@ -256,7 +257,7 @@ public class ConciergeService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        // TODO Auto-generated method stub
+        // do nothing
         return null;
     }
 
@@ -332,6 +333,7 @@ public class ConciergeService extends Service {
                     downY = y;
                     dragStartX = x;
                     dragStartY = y;
+                    totalDrag = 0;
 //                    Log.i(TAG, "first mParams " + mParams.x + ","+mParams.y);
                     break;
 
@@ -354,7 +356,7 @@ public class ConciergeService extends Service {
                     }
 
                     // ドラッグ距離に応じてももちゃんの表情をかえる
-                    if (totalDrag < 300) {
+                    if (totalDrag < DRAG_LENGTH_GURUGURU) {
                         changeAnimeType(MOMO_SURPRISE);
                     } else {
                         changeAnimeType(MOMO_TROUBLE_B);
@@ -388,9 +390,14 @@ public class ConciergeService extends Service {
                                 break;
                         }
                     }
-                    // ドラッグをしたとき
+                    // ドラッグをしてたとき
                     else {
-                        changeAnimeType(MOMO_TROUBLE_A);
+                        if (totalDrag > DRAG_LENGTH_GURUGURU) {
+                            changeAnimeType(MOMO_TROUBLE_B);
+                            speechMomo(R.raw.mm_4_error_huee, false);
+                        } else {
+                            changeAnimeType(MOMO_TROUBLE_A);
+                        }
                     }
                     break;
             }
@@ -482,12 +489,22 @@ public class ConciergeService extends Service {
     }
 
     /**
-     * ももちゃんにしゃべらせる
-     * @param resId
+     * ももちゃんに喋らせる
      */
     private void speechMomo(int resId) {
+        speechMomo(resId, true);
+    }
+
+    /**
+     * ももちゃんにしゃべらせる
+     * @param resId
+     * @param isTalk おしゃべりか否か（表情に関わる）
+     */
+    private void speechMomo(int resId, boolean isTalk) {
         mTalkingFlag = true;
-        changeAnimeType(MOMO_TALK);
+        if (isTalk) {
+            changeAnimeType(MOMO_TALK);
+        }
         Utils.speechVoice(sContext, resId, new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
