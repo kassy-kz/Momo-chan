@@ -8,6 +8,8 @@ import android.media.MediaPlayer;
 import android.os.BatteryManager;
 import android.util.Log;
 
+import java.util.Calendar;
+
 public class MyReceiver extends BroadcastReceiver {
     private static final String TAG = "receiver";
     private final Context mContext;
@@ -64,8 +66,72 @@ public class MyReceiver extends BroadcastReceiver {
         else if (Utils.ACTION_ALARM.equals(action)) {
             speechVoice(R.raw.mm_126_time_kisyounojikan);
         }
+        // 時間経過
+        else if (Intent.ACTION_TIME_TICK.equals(action)) {
+            Calendar cal = Calendar.getInstance();
+            if (cal.get(Calendar.MINUTE) == 0) {
+                speechJihou(cal.get(Calendar.HOUR));
+            }
+        }
     }
 
+    /**
+     * 時報をしゃべる
+     * @param hour
+     */
+    private void speechJihou(int hour) {
+        switch (hour) {
+            case 1:
+            case 13:
+                speechVoice(R.raw.mm_82_jihou_1ji);
+                break;
+            case 2:
+            case 14:
+                speechVoice(R.raw.mm_83_jihou_2ji);
+                break;
+            case 3:
+            case 15:
+                speechVoice(R.raw.mm_84_jihou_3ji);
+                break;
+            case 4:
+            case 16:
+                speechVoice(R.raw.mm_85_jihou_4ji);
+                break;
+            case 5:
+            case 17:
+                speechVoice(R.raw.mm_86_jihou_5ji);
+                break;
+            case 6:
+            case 18:
+                speechVoice(R.raw.mm_87_jihou_6ji);
+                break;
+            case 7:
+            case 19:
+                speechVoice(R.raw.mm_88_jihou_7ji);
+                break;
+            case 8:
+            case 20:
+                speechVoice(R.raw.mm_89_jihou_8ji);
+                break;
+            case 9:
+            case 21:
+                speechVoice(R.raw.mm_102_jihou_9ji);
+                break;
+            case 10:
+            case 22:
+                speechVoice(R.raw.mm_103_jihou_10ji);
+                break;
+            case 11:
+            case 23:
+                speechVoice(R.raw.mm_104_jihou_11ji);
+                break;
+            case 12:
+            case 24:
+            case 0:
+                speechVoice(R.raw.mm_93_jihou_12ji);
+                break;
+        }
+    }
 
 
     private void speechVoice(int resId) {

@@ -92,6 +92,8 @@ public class MyNotificationListenerService extends NotificationListenerService {
         registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_CAMERA_BUTTON));
         registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_USER_PRESENT));
         registerReceiver(mReceiver, new IntentFilter(Utils.ACTION_ALARM));
+        registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
+
         return START_NOT_STICKY;
     }
 
