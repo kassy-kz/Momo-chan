@@ -170,7 +170,9 @@ public class MyNotificationListenerService extends NotificationListenerService {
         // その他
         else {
             Log.i(TAG, "app: other");
-            Utils.speechVoice(this, R.raw.mm_145_mailapp_nankakiteruyo, null);
+            // do nothing
+            // その他でしゃべらせるのは危険過ぎる
+//            Utils.speechVoice(this, R.raw.mm_145_mailapp_nankakiteruyo, null);
         }
     }
 
