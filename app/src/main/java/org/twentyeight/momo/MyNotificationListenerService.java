@@ -203,7 +203,7 @@ public class MyNotificationListenerService extends NotificationListenerService {
         // DELボタンを追加する
         Intent stopIntent = new Intent("orz.kassy.momo.stop");
         PendingIntent pIntent = PendingIntent.getBroadcast(this, 10, stopIntent, PendingIntent.FLAG_ONE_SHOT);
-        notificationBuilder.addAction(android.R.drawable.ic_input_delete, "終了", pIntent);
+        notificationBuilder.addAction(android.R.drawable.ic_input_delete, "退場", pIntent);
 
         // 横フリックで消されないようにしたい
         Notification noti = notificationBuilder.build();
