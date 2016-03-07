@@ -190,7 +190,7 @@ public class MyNotificationListenerService extends NotificationListenerService {
         notificationBuilder.setSmallIcon(R.drawable.ic_get_app);
 
         // 大きなアイコンを設定
-        notificationBuilder.setContentTitle("通知マネージャー起動中");
+        notificationBuilder.setContentTitle("ももちゃん登場中");
         Bitmap largeIcon = BitmapFactory.decodeResource(
                 getResources(), R.mipmap.ic_launcher);
         notificationBuilder.setLargeIcon(largeIcon);
