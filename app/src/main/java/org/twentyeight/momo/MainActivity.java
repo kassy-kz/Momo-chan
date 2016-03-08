@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // 通知の許可はL以上でのみ必要
+        // 通知の許可は全部のバージョンで必要
         if (!isNotificationAllowed()) {
             Log.i(TAG, "get permission 3");
             showManualDialog(R.drawable.manual3, PERMISSION_TYPE_NOTIFICATION);
@@ -162,10 +162,10 @@ public class MainActivity extends AppCompatActivity {
      * これが微妙に不安定というか、レス悪いというか...
      */
     private boolean isNotificationAllowed() {
-        // 4.4以下なら無条件OK
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT_WATCH) {
-            return true;
-        }
+        // 4.4以下なら無条件OK... ではない？
+//        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT_WATCH) {
+//            return true;
+//        }
         ContentResolver contentResolver = getContentResolver();
         String enabledNotificationListeners = Settings.Secure.getString(contentResolver, "enabled_notification_listeners");
         String packageName = getPackageName();
@@ -198,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
         String postStr = "";
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             postStr = "（全部で3）";
-        } else {
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
             postStr = "（全部で2）";
         }
         String title = getResources().getString(R.string.manual_title) + postStr;
