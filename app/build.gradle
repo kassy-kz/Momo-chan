@@ -8,8 +8,8 @@ android {
         applicationId "org.twentyeight.momo"
         minSdkVersion 19
         targetSdkVersion 23
-        versionCode 4
-        versionName "1.02"
+        versionCode 5
+        versionName "1.1"
     }
     buildTypes {
         release {
