@@ -56,6 +56,9 @@ public class MyNotificationListenerService extends NotificationListenerService {
      * @return
      */
     public static boolean isRunning() {
+        if (sSelf == null) {
+            return false;
+        }
         return sSelf.mIsRunning;
     }
 

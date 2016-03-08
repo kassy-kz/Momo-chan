@@ -92,12 +92,14 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        // Usageの許可はL以上でのみ必要
         if (!isUsageStatsAllowed()) {
             Log.i(TAG, "get permission 2");
             showManualDialog(R.drawable.manual2, PERMISSION_TYPE_USAGE);
             return;
         }
 
+        // 通知の許可はL以上でのみ必要
         if (!isNotificationAllowed()) {
             Log.i(TAG, "get permission 3");
             showManualDialog(R.drawable.manual3, PERMISSION_TYPE_NOTIFICATION);
@@ -160,12 +162,15 @@ public class MainActivity extends AppCompatActivity {
      * これが微妙に不安定というか、レス悪いというか...
      */
     private boolean isNotificationAllowed() {
-
+        // 4.4以下なら無条件OK
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT_WATCH) {
+            return true;
+        }
         ContentResolver contentResolver = getContentResolver();
         String enabledNotificationListeners = Settings.Secure.getString(contentResolver, "enabled_notification_listeners");
         String packageName = getPackageName();
         Log.i(TAG, "noti allowed : "+ enabledNotificationListeners);
-        Log.i(TAG, "contain : " + enabledNotificationListeners.contains(packageName));
+//        Log.i(TAG, "contain : " + enabledNotificationListeners.contains(packageName));
         return !(enabledNotificationListeners == null || !enabledNotificationListeners.contains(packageName));
     }
 
