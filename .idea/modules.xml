@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Concierge.iml" filepath="$PROJECT_DIR$/Concierge.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Momo_chan.iml" filepath="$PROJECT_DIR$/Momo_chan.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
